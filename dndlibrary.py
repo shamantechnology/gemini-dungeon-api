@@ -9,7 +9,6 @@ import os
 import subprocess
 import logging
 from unstructured.partition.pdf import partition_pdf
-from abstractextractor import AbstractExtractor
 
 # for google vertex ai token refreshing
 def refresh_token() -> str:
@@ -24,16 +23,16 @@ class DNDLibrary:
         self.pdf_location = "data/"
         self.pdf_path = Path(self.pdf_location)
         self.weaviate_client = None
-        self.vectorstore_id = "dndlibrary"
+        self.vectorstore_class = "dndlibrary"
 
         # setup logging
         logging.basicConfig(
             format="%(asctime)s - %(message)s")
         self.class_logger = logging.getLogger(__name__)
 
-    def re_instantiate_weaviate(self) -> weaviate.Client:
+    def re_instantiate_weaviate(self):
         try:
-            token = self.refresh_token()
+            token = refresh_token()
 
             if token:
                 self.weaviate_client = weaviate.Client(
@@ -63,33 +62,36 @@ class DNDLibrary:
 
             elements = partition_pdf(filename=path)
 
-            abstract_extractor = AbstractExtractor()
-            abstract_extractor.consume_elements(elements)
+            for i in range(len(elements)):
+                data_object = {
+                    "source": path.name, 
+                    "content": elements[i].text
+                }
+                
+                data_objects.append(data_object)
 
-            data_object = {"source": path.name, "abstract": abstract_extractor.abstract()}
+            self.class_logger.info(f"Added {len(data_objects)} data objects from {path.name}")
 
-            data_objects.append(data_object)
-
-        # load into weaviate
-        self.weaviate_client.batch.configure(batch_size=100)  # Configure batch
-        with self.weaviate_client.batch as batch:
-            for data_object in data_objects:
-                batch.add_data_object(data_object, "Document")
+            # load into weaviate
+            self.class_logger.info(f"Loading {path.name} into Weaviate")
+            self.weaviate_client.batch.configure(batch_size=100)  # Configure batch
+            with self.weaviate_client.batch as batch:
+                for data_object in data_objects:
+                    batch.add_data_object(
+                        data_object,
+                        self.vectorstore_class
+                    )
     
     def run(self):
+        # connect to weaviate embedded
+        self.re_instantiate_weaviate()
+
         # check if collection is already created
         # if not create collection and load PDFS
-        collection_found = False
-        try:
-            collection_check = self.weaviate_client.collections.get(self.vectorstore_id)
-            self.class_logger.info(f"{self.vectorstore_id} exists. Skip loading.")
-            collection_found = True
-        except Exception as err:
-            self.class_logger.error(f"Run failed, no collection found: {err}")
-            collection_found = False
-            pass
-
-        if not collection_found:
+        collection_found = self.weaviate_client.schema.exists(self.vectorstore_class)
+        if collection_found:
+            self.class_logger.info(f"{self.vectorstore_class} exists. Skip loading.")
+        else:
             self.class_logger.info("Loading DND library...")
             self.load_library()
 
