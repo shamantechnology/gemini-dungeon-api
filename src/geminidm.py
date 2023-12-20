@@ -52,6 +52,19 @@ class GeminiDM:
             for tline in txtfile.readlines():
                 prompt_txt += tline
 
+        # build prompt with player information and 
+        # for the chat buffer
+        prompt_txt += f"""
+        Player Info:
+        {self.player.player_sheet()}\n"""
+
+        prompt_txt += """
+        Current Conversation:
+        {history}
+        
+        Human: {input}
+        AI:"""
+
         self.instruction_prompt_template = PromptTemplate(
             input_variables=["history", "input"], template=prompt_txt
         )
@@ -76,18 +89,17 @@ class GeminiDM:
         )
 
         # setup memory
-        retriever = self.vectorstore.as_retriever(search_kwargs=dict(k=1))
+        retriever = self.vectorstore.as_retriever(search_kwargs=dict(k=3))
         self.memory = VectorStoreRetrieverMemory(
             retriever=retriever
         )
 
         self.memory.save_context(
-            {"System": f"Player Information\n{self.player.player_sheet()}"}, {"AI": ""}
+            {"input": f"Player Information\n{self.player.player_sheet()}"}, {"output": ""}
         )
-
-
         self.memory.save_context(
-            {"System": f"The story\n{story_txt}"}, {"AI": ""}
+            {"input": f"The story\n{story_txt}"},
+            {"output": ""}
         )
 
         # creating llm chain
