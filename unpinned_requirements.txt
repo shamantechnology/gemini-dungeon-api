@@ -1,0 +1,12 @@
+weaviate-client
+unstructured
+pdf2image
+pdfminer.six
+pre-commit
+flask
+flask_cors
+opencv-contrib-python-headless
+pikepdf
+pypdf
+unstructured_inference
+langchain

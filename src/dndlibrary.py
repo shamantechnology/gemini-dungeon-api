@@ -2,6 +2,7 @@
 DNDLibrary class
 Manages the DND books including the base guides of DM, Monster and Player
 """
+from pikepdf import _cpphelpers
 from pathlib import Path
 import weaviate
 from weaviate.embedded import EmbeddedOptions
@@ -9,20 +10,24 @@ import os
 import subprocess
 from unstructured.partition.pdf import partition_pdf
 
+
 from langchain.chat_models import ChatVertexAI
 from langchain.vectorstores import Weaviate
 
 import logging
-logging.basicConfig(
-    format="\n[%(asctime)s] %(name)s - %(levelname)s - %(message)s\n")
+
+logging.basicConfig(format="\n[%(asctime)s] %(name)s - %(levelname)s - %(message)s\n")
 
 # for google vertex ai token refreshing
 def refresh_token() -> str:
-    result = subprocess.run(["gcloud", "auth", "print-access-token"], capture_output=True, text=True)
+    result = subprocess.run(
+        ["gcloud", "auth", "print-access-token"], capture_output=True, text=True
+    )
     if result.returncode != 0:
         print(f"Error refreshing token: {result.stderr}")
         return None
     return result.stdout.strip()
+
 
 class DNDLibrary:
     def __init__(self):
@@ -41,14 +46,10 @@ class DNDLibrary:
 
             if token:
                 self.weaviate_client = weaviate.Client(
-                    additional_headers={
-                        "X-Palm-Api-Key": token
-                    },
+                    additional_headers={"X-Palm-Api-Key": token},
                     embedded_options=EmbeddedOptions(
-                        additional_env_vars={
-                            "ENABLE_MODULES": "text2vec-palm"
-                        }
-                    )
+                        additional_env_vars={"ENABLE_MODULES": "text2vec-palm"}
+                    ),
                 )
             else:
                 raise ValueError
@@ -66,39 +67,34 @@ class DNDLibrary:
                 elements = partition_pdf(filename=path)
 
                 for i in range(len(elements)):
-                    data_object = {
-                        "source": path.name, 
-                        "content": elements[i].text
-                    }
-                    
+                    data_object = {"source": path.name, "content": elements[i].text}
+
                     data_objects.append(data_object)
-                
-                self.class_logger.info(f"Added {len(data_objects)} data objects from {path.name}")
+
+                self.class_logger.info(
+                    f"Added {len(data_objects)} data objects from {path.name}"
+                )
             elif path.suffix == ".txt":
                 # chunk up file and add to data_objects
                 self.class_logger.info(f"Processing text file {path.name}")
                 chunk_size = 100
                 with open(path) as txtfile:
                     while content := txtfile.read(chunk_size):
-                        data_object = {
-                            "source": path.name,
-                            "content": content
-                        }
+                        data_object = {"source": path.name, "content": content}
 
                         data_objects.append(data_object)
-                        
-                self.class_logger.info(f"Added {len(data_objects)} data objects from {path.name}")
+
+                self.class_logger.info(
+                    f"Added {len(data_objects)} data objects from {path.name}"
+                )
 
             # load into weaviate
             self.class_logger.info("Loading data_objects into weaviate")
             self.weaviate_client.batch.configure(batch_size=1000)
             with self.weaviate_client.batch as batch:
                 for data_object in data_objects:
-                    batch.add_data_object(
-                        data_object,
-                        self.vectorstore_class
-                    )
-    
+                    batch.add_data_object(data_object, self.vectorstore_class)
+
     def run(self):
         # connect to weaviate embedded
         self.re_instantiate_weaviate()
@@ -111,5 +107,3 @@ class DNDLibrary:
         else:
             self.class_logger.info("Loading DND library...")
             self.load_library()
-
-

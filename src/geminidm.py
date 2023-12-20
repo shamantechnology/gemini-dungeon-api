@@ -4,8 +4,8 @@ Gemini DM
 Gemini AI based dungeon master
 """
 import logging
-logging.basicConfig(
-    format="[%(asctime)s] %(name)s - %(levelname)s - %(message)s")
+
+logging.basicConfig(format="[%(asctime)s] %(name)s - %(levelname)s - %(message)s")
 
 from pathlib import Path
 from concurrent.futures import as_completed
@@ -24,14 +24,12 @@ from trulens_eval import Feedback, LiteLLM, TruChain
 
 from player import Player
 
+
 class GeminiDM:
-    def __init__(self, player: any=None):
+    def __init__(self, player: any = None):
         self.instruction_prompt_path = Path("prompts/dmstart.txt")
         self.player = player if player else Player()
-        self.llm = ChatGoogleGenerativeAI(
-            temperature=0.1,
-            model="gemini-pro"
-        )
+        self.llm = ChatGoogleGenerativeAI(temperature=0.1, model="gemini-pro")
         self.conversation = None
         self.chain_recorder = None
 
@@ -45,13 +43,11 @@ class GeminiDM:
             prompt_txt += txtfile.readline()
 
         self.instruction_prompt_template = PromptTemplate(
-            input_variables=["player", "history"],
-            template=prompt_txt
+            input_variables=["player", "history"], template=prompt_txt
         )
 
         self.instruction_prompt = self.instruction_prompt_template.format(
-            player=self.player.player_sheet(),
-            history=""
+            player=self.player.player_sheet(), history=""
         )
 
         # setup chat vectorstore
@@ -60,14 +56,12 @@ class GeminiDM:
             VertexAIEmbeddings().embed_query,
             faiss.IndexFlatL2(),
             InMemoryDocstore({}),
-            {}
+            {},
         )
 
         # setup memory
         self.memory = VectorStoreRetrieverMemory(
-            retriever=self.vectorstore.as_retriever(
-                search_kwargs=dict(k=1)
-            )
+            retriever=self.vectorstore.as_retriever(search_kwargs=dict(k=1))
         )
 
         # creating llm chain
@@ -75,20 +69,18 @@ class GeminiDM:
             llm=self.llm,
             prompt=self.instruction_prompt,
             memory=self.memory,
-            verbose=True
+            verbose=True,
         )
 
         # setup trulens
         feedbacks = []
-        
+
         # use conciseness feedback
         litellm_provider = LiteLLM(model_engine="chat-bison")
         feedbacks.append(Feedback(litellm_provider.conciseness).on_output())
-        
+
         self.chain_recorder = TruChain(
-            self.conversation,
-            app_id="med-coder-llm",
-            feedbacks=feedbacks
+            self.conversation, app_id="med-coder-llm", feedbacks=feedbacks
         )
 
     def chat(self, user_msg: str) -> str:
@@ -107,15 +99,11 @@ class GeminiDM:
                 feedback, feedback_result = feedback_future.result()
 
                 if feedback.name == "conciseness":
-                    conciseness_val = float(feedback_result.result) if feedback_result.result else 1.0
-        
+                    conciseness_val = (
+                        float(feedback_result.result) if feedback_result.result else 1.0
+                    )
+
         if conciseness_val < 0.5:
             return "I don't not understand...."
         else:
             return resp.content
-
-
-                
-
-
-

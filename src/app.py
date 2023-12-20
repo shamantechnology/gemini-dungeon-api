@@ -5,23 +5,19 @@ Game logic, chat and image generation api for gemini-dungeon frontend
 """
 from datetime import datetime
 
-from flask import (
-    Flask,
-    request,
-    jsonify, 
-    make_response
-)
+from flask import Flask, request, jsonify, make_response
 
 from flask_cors import CORS
 
 from dndlibrary import DNDLibrary
 
 import logging
-logging.basicConfig(
-    format="[%(asctime)s] %(name)s - %(levelname)s - %(message)s")
+
+logging.basicConfig(format="[%(asctime)s] %(name)s - %(levelname)s - %(message)s")
 
 app = Flask(__name__)
 CORS(app)
+
 
 @app.route("/run", methods=["POST"])
 def run():
@@ -35,11 +31,12 @@ def run():
     except Exception as err:
         logger.error(err)
         raise
-    
+
     json_reply = jsonify({"ai": "test", "vision": "asvbcds"})
     return make_response(json_reply, 201)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
 

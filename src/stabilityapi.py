@@ -5,14 +5,11 @@ import base64
 import os
 import requests
 
+
 class StabilityAPI:
-    def __init__(self,
-        engine_id: str = "stable-diffusion-xl-1024-v1-0"):
+    def __init__(self, engine_id: str = "stable-diffusion-xl-1024-v1-0"):
         self.engine_id = engine_id
-        self.api_host = os.getenv(
-            "STABILITY_API_HOST",
-            "https://api.stability.ai"
-        )
+        self.api_host = os.getenv("STABILITY_API_HOST", "https://api.stability.ai")
         self.api_key = os.getenv("STABILITY_API_KEY")
 
     def generate_image(self, prompt: str) -> dict:
@@ -24,14 +21,10 @@ class StabilityAPI:
             headers={
                 "Content-Type": "application/json",
                 "Accept": "application/json",
-                "Authorization": f"Bearer {self.api_key}"
+                "Authorization": f"Bearer {self.api_key}",
             },
             json={
-                "text_prompts": [
-                    {
-                        "text": prompt
-                    }
-                ],
+                "text_prompts": [{"text": prompt}],
                 "cfg_scale": 30,
                 "height": 1024,
                 "width": 1024,
