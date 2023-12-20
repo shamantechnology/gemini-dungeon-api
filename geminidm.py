@@ -12,7 +12,7 @@ from concurrent.futures import as_completed
 
 import faiss
 
-from langchain.prompts import SystemMessagePromptTemplate
+from langchain.prompts import PromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.embeddings import VertexAIEmbeddings
 from langchain.docstore import InMemoryDocstore
@@ -44,8 +44,9 @@ class GeminiDM:
         with open(self.instruction_prompt_path) as txtfile:
             prompt_txt += txtfile.readline()
 
-        self.instruction_prompt_template = SystemMessagePromptTemplate(
-            prompt=prompt_txt
+        self.instruction_prompt_template = PromptTemplate(
+            input_variables=["player", "history"],
+            template=prompt_txt
         )
 
         self.instruction_prompt = self.instruction_prompt_template.format(
