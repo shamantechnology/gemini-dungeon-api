@@ -7,7 +7,7 @@ import requests
 
 class StabilityAPI:
     def __init__(self,
-        engine_id: str = "stable-diffusion-v1-6"):
+        engine_id: str = "stable-diffusion-xl-1024-v1-0"):
         self.engine_id = engine_id
         self.api_host = os.getenv(
             "STABILITY_API_HOST",
@@ -33,8 +33,8 @@ class StabilityAPI:
                     }
                 ],
                 "cfg_scale": 30,
-                "height": 800,
-                "width": 800,
+                "height": 1024,
+                "width": 1024,
                 "samples": 1,
                 "steps": 30,
             },

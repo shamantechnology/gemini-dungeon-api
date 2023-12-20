@@ -7,8 +7,14 @@ import weaviate
 from weaviate.embedded import EmbeddedOptions
 import os
 import subprocess
-import logging
 from unstructured.partition.pdf import partition_pdf
+
+from langchain.chat_models import ChatVertexAI
+from langchain.vectorstores import Weaviate
+
+import logging
+logging.basicConfig(
+    format="\n[%(asctime)s] %(name)s - %(levelname)s - %(message)s\n")
 
 # for google vertex ai token refreshing
 def refresh_token() -> str:
@@ -26,9 +32,8 @@ class DNDLibrary:
         self.vectorstore_class = "dndlibrary"
 
         # setup logging
-        logging.basicConfig(
-            format="%(asctime)s - %(message)s")
         self.class_logger = logging.getLogger(__name__)
+        self.class_logger.setLevel(logging.DEBUG)
 
     def re_instantiate_weaviate(self):
         try:
@@ -55,26 +60,38 @@ class DNDLibrary:
         data_objects = []
 
         for path in self.pdf_path.iterdir():
-            if path.suffix != ".pdf":
-                continue
+            if path.suffix == ".pdf":
+                self.class_logger.info(f"Processing PDF {path.name}")
 
-            self.class_logger.info(f"Processing {path.name}...")
+                elements = partition_pdf(filename=path)
 
-            elements = partition_pdf(filename=path)
-
-            for i in range(len(elements)):
-                data_object = {
-                    "source": path.name, 
-                    "content": elements[i].text
-                }
+                for i in range(len(elements)):
+                    data_object = {
+                        "source": path.name, 
+                        "content": elements[i].text
+                    }
+                    
+                    data_objects.append(data_object)
                 
-                data_objects.append(data_object)
+                self.class_logger.info(f"Added {len(data_objects)} data objects from {path.name}")
+            elif path.suffix == ".txt":
+                # chunk up file and add to data_objects
+                self.class_logger.info(f"Processing text file {path.name}")
+                chunk_size = 100
+                with open(path) as txtfile:
+                    while content := txtfile.read(chunk_size):
+                        data_object = {
+                            "source": path.name,
+                            "content": content
+                        }
 
-            self.class_logger.info(f"Added {len(data_objects)} data objects from {path.name}")
+                        data_objects.append(data_object)
+                        
+                self.class_logger.info(f"Added {len(data_objects)} data objects from {path.name}")
 
             # load into weaviate
-            self.class_logger.info(f"Loading {path.name} into Weaviate")
-            self.weaviate_client.batch.configure(batch_size=100)  # Configure batch
+            self.class_logger.info("Loading data_objects into weaviate")
+            self.weaviate_client.batch.configure(batch_size=1000)
             with self.weaviate_client.batch as batch:
                 for data_object in data_objects:
                     batch.add_data_object(
