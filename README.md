@@ -17,7 +17,7 @@ this ensures that all requirements are pinned and work together for ensuring rep
 
 ### Story
 
-To setup the story of your adventure, create a .txt file with the story in the data folder. 
+To setup the story of your adventure, create a .txt file with the story in a folder called "data" in the "src" folder. 
 
 Story example of gemini's maze
 
