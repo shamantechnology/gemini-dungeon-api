@@ -8,18 +8,17 @@ Right now a base level 1 Paladin but will expand to make it customizable
 from dnd_character.classes import Paladin
 from dnd_character.equipment import Item
 import logging
-logging.basicConfig(
-    format="\n[%(asctime)s] %(name)s - %(levelname)s - %(message)s\n")
+
+logging.basicConfig(format="\n[%(asctime)s] %(name)s - %(levelname)s - %(message)s\n")
 
 
 class Player:
-    def __init__(self, first_name: str="", last_name: str=""):
+    def __init__(self, first_name: str = "", last_name: str = ""):
         self.location = []
         self.player_first_name = first_name if first_name != "" else "Hacker"
         self.player_last_name = last_name if last_name != "" else "McHackerface"
-        self.player = Paladin(
-            name=f"{self.player_first_name} {self.player_last_name}")
-        
+        self.player = Paladin(name=f"{self.player_first_name} {self.player_last_name}")
+
         # setup logging
         self.class_logger = logging.getLogger(__name__)
         self.class_logger.setLevel(logging.DEBUG)
@@ -136,4 +135,3 @@ class Player:
         Generate a player sheet for the AI to use
         """
         return str(self.player).replace("\n", " ")
-        
