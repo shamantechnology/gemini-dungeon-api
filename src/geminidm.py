@@ -94,13 +94,8 @@ class GeminiDM:
             retriever=retriever
         )
 
-        self.memory.save_context(
-            {"input": f"Player Information\n{self.player.player_sheet()}"}, {"output": ""}
-        )
-        self.memory.save_context(
-            {"input": f"The story\n{story_txt}"},
-            {"output": ""}
-        )
+        # add blank context to kickstart things
+        self.memory.save_context({"input": ""},{"output": ""})
 
         # creating llm chain
         self.conversation = ConversationChain(
