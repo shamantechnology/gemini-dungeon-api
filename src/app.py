@@ -16,24 +16,29 @@ from stabilityapi import StabilityAPI
 logging.basicConfig(format="[%(asctime)s] %(name)s - %(levelname)s - %(message)s")
 
 app = Flask(__name__)
-CORS(app, resource={
-    r"/*":{
-        "origins":"*"
+CORS(app, resource={r"/*": {"origins": "*"}})
+
+
+@app.before_request
+def before_request():
+    headers = {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type",
     }
-})
+
+    if request.method == "OPTIONS" or request.method == "options":
+        return jsonify(headers), 200
+
 
 @app.route("/dmstart", methods=["POST"])
 def dmstart():
     """
     Starts the process and creates the first message and image
     """
-    
+
     user_msg = "start"
-    reply_dict = {
-        "ai": "",
-        "vision": "",
-        "error": ""
-    }
+    reply_dict = {"ai": "", "vision": "", "error": ""}
 
     caught_exception = False
 
@@ -42,7 +47,9 @@ def dmstart():
     except Exception as err:
         logger.error(err)
         reply_dict["error"] = "system error"
-        reply_dict["ai"] = "I'm sorry but could you state that again? I have seem to caught an error."
+        reply_dict[
+            "ai"
+        ] = "I'm sorry but could you state that again? I have seem to caught an error."
         caught_exception = True
 
     try:
@@ -50,7 +57,9 @@ def dmstart():
     except json.JSONDecodeError as err:
         logger.error(err)
         reply_dict["error"] = "system error - json failed from AI"
-        reply_dict["ai"] = "I'm sorry but could you state that again? I have seem to caught an error."
+        reply_dict[
+            "ai"
+        ] = "I'm sorry but could you state that again? I have seem to caught an error."
         caught_exception = True
 
     try:
@@ -58,13 +67,15 @@ def dmstart():
     except Exception as err:
         logger.error(err)
         reply_dict["error"] = "system error - stability failed"
-        reply_dict["ai"] = f"I'm sorry but could not generate you an image.\n{ai_json['content']}"
+        reply_dict[
+            "ai"
+        ] = f"I'm sorry but could not generate you an image.\n{ai_json['content']}"
         caught_exception = True
 
     if not caught_exception:
         reply_dict["ai"] = ai_json["content"]
         reply_dict["vision"] = sapi_reply["artifacts"][0]["base64"]
-    
+
     json_reply = jsonify(reply_dict)
     return make_response(json_reply, 201)
 
@@ -72,11 +83,7 @@ def dmstart():
 @app.route("/run", methods=["POST"])
 def run():
     user_msg = request.json["usermsg"]
-    reply_dict = {
-        "ai": "",
-        "vision": "",
-        "error": ""
-    }
+    reply_dict = {"ai": "", "vision": "", "error": ""}
 
     try:
         ai_resp = gdm.chat(user_msg=user_msg)
@@ -85,7 +92,7 @@ def run():
         reply_dict["error"] = "system error"
         json_reply = jsonify(reply_dict)
         return make_response(json_reply, 500)
-    
+
     print(ai_resp)
 
     try:
