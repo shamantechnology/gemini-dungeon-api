@@ -5,7 +5,7 @@ Game logic, chat and image generation api for gemini-dungeon frontend
 """
 from datetime import datetime
 from flask import Flask, request, jsonify, make_response
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 from dotenv import load_dotenv
 import logging
 import json
@@ -19,6 +19,7 @@ app = Flask(__name__)
 CORS(app)
 
 @app.route("/dmstart", methods=["POST"])
+@cross_origin
 def dmstart():
     """
     Starts the process and creates the first message and image
