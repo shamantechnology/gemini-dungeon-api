@@ -13,6 +13,7 @@ Constraints:
 - For image prompts, keep pictures consistent
 - Use your imagination to do any sort of spin off the synopsis
 - Only reply in the following JSON format. Make sure it does not cause an error when converting from text to JSON via the JSON python library
+- Make sure you end each statement with a call to action for the player
 {{
     "content": "what you are saying to the player as the DM",
     "view": "describe what the player should be viewing in a prompt format for stable diffusion. Use random different art styles to create a unique view."
