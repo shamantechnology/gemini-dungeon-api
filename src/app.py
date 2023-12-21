@@ -39,7 +39,7 @@ def dmstart():
     Starts the process and creates the first message and image
     """
 
-    user_msg = "start"
+    user_msg = "Hello"
     reply_dict = {"ai": "", "vision": "", "error": ""}
 
     caught_exception = False
