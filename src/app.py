@@ -18,6 +18,21 @@ logging.basicConfig(format="[%(asctime)s] %(name)s - %(levelname)s - %(message)s
 app = Flask(__name__)
 CORS(app)
 
+with app.app_context():
+    load_dotenv()
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+
+    logger.info("Starting GeminiDM module")
+    gdm = GeminiDM()
+
+    logger.info("starting stability.ai API")
+    sapi = StabilityAPI()
+
+    # start med coder with api start
+    dt_run = datetime.now().strftime("%m%d%Y %H:%M:%s")
+    logger.info(f"------ Starting Gemini Dungeon API @ {dt_run} ---------")
+
 @app.route("/dmstart", methods=["POST"])
 def dmstart():
     """
@@ -104,18 +119,6 @@ def run():
     return make_response(json_reply, 201)
 
 
-if __name__ == "__main__":
-    load_dotenv()
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
-
-    logger.info("Starting GeminiDM module")
-    gdm = GeminiDM()
-
-    logger.info("starting stability.ai API")
-    sapi = StabilityAPI()
-
-    # start med coder with api start
-    dt_run = datetime.now().strftime("%m%d%Y %H:%M:%s")
-    logger.info(f"------ Starting Gemini Dungeon API @ {dt_run} ---------")
-    app.run(host="0.0.0.0", port=8080)
+# if __name__ == "__main__":
+    
+#     app.run(host="0.0.0.0", port=8080)
