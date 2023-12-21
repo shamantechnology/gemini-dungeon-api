@@ -121,4 +121,4 @@ if __name__ == "__main__":
     # start med coder with api start
     dt_run = datetime.now().strftime("%m%d%Y %H:%M:%s")
     logger.info(f"------ Starting Gemini Dungeon API @ {dt_run} ---------")
-    app.run(host="0.0.0.0", port=8080)
+    app.run(host="127.0.0.1", port=8000)
