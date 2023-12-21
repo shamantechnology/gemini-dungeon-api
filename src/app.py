@@ -16,7 +16,7 @@ from stabilityapi import StabilityAPI
 logging.basicConfig(format="[%(asctime)s] %(name)s - %(levelname)s - %(message)s")
 
 app = Flask(__name__)
-CORS(app, resource={r"/*": {"origins": "*"}})
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 
 @app.before_request
