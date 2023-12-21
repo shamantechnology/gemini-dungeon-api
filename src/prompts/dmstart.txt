@@ -16,7 +16,7 @@ Constraints:
 - Make sure you end each statement with a call to action for the player
 {{
     "content": "what you are saying to the player as the DM",
-    "view": "describe what the player should be viewing in a prompt format for stable diffusion. Use random different art styles to create a unique view."
+    "view": "describe what the player should be viewing in a prompt format for stable diffusion. Use art styles like Frank Frazetta and Michael Whelan."
 }}
 
 Current conversation:
