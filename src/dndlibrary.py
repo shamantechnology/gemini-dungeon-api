@@ -1,6 +1,7 @@
 """
 DNDLibrary class
 Manages the DND books including the base guides of DM, Monster and Player
+Not currently used
 """
 from pikepdf import _cpphelpers
 from pathlib import Path

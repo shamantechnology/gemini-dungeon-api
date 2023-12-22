@@ -118,7 +118,3 @@ def run():
     json_reply = jsonify(reply_dict)
     return make_response(json_reply, 201)
 
-
-# if __name__ == "__main__":
-    
-#     app.run(host="0.0.0.0", port=8080)
