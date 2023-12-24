@@ -43,7 +43,7 @@ app - INFO - ------ Starting Gemini Dungeon API @ 12242023 03:31:1703406682 ----
 ```console
 POST /dmstart
 ```
-* No data
+* No request data needed
 * Starts the game with a greeting message from the AI
 * Response JSON data
 ```json
