@@ -58,6 +58,9 @@ JSON data containing messages/replies from user to AI
 }
 ```
 
+### Front-End
+[Gemini Dungeon Frontend](https://github.com/shamantechnology/gemini-dungeon)
+
 ### Story
 
 To setup the story of your adventure, create a .txt file with the story in a folder called "data" in the "src" folder. 
