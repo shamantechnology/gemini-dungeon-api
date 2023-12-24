@@ -41,24 +41,35 @@ app - INFO - ------ Starting Gemini Dungeon API @ 12242023 03:31:1703406682 ----
 ### API Endpoints
 
 ```console
-/dmstart
+POST /dmstart
 ```
-
-POST
-No data
-
-Starts the game with a greeting message from the AI
-
-```console
-/run
-```
-
-POST
-JSON data containing messages/replies from user to AI
-
+* No data
+* Starts the game with a greeting message from the AI
+* Response JSON data
 ```json
 {
-    "usermsg": "string"
+    "ai": "string, ai reply",
+    "vision": "string, ai generated image prompt",
+    "error": "any errors"
+}
+```
+
+```console
+POST /run
+```
+* Request JSON data required
+* Request should contain single user messages/replies
+```json
+{
+    "usermsg": "string, user message or reply"
+}
+```
+* Response JSON data
+```json
+{
+    "ai": "string, ai message or reply",
+    "vision": "string, ai generated image prompt",
+    "error": "any errors"
 }
 ```
 
