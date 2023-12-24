@@ -15,6 +15,49 @@ make virtualenv
 ```
 this ensures that all requirements are pinned and work together for ensuring reproducibility
 
+### Running
+
+To run the API, it is suggested to use something like uwsgi or gunicorn. We use [gunicorn](https://docs.gunicorn.org/en/stable/run.html).
+
+For example,
+
+```console
+gunicorn -w 1 -b :8080 app:app
+```
+
+while in the src/ folder will start the service and wait for input
+
+```console
+$ gunicorn -w 1 -b :8080 app:app
+[9849] [INFO] Starting gunicorn 21.2.0
+[9849] [INFO] Listening at: http://0.0.0.0:8080 (9849)
+[9849] [INFO] Using worker: sync
+[9850] [INFO] Booting worker with pid: 9850
+app - INFO - Starting GeminiDM module
+app - INFO - starting stability.ai API
+app - INFO - ------ Starting Gemini Dungeon API @ 12242023 03:31:1703406682 ---------
+```
+
+### API Endpoints
+
+*/dmstart*
+
+POST
+No data
+
+Starts the game with a greeting message from the AI
+
+*/run*
+
+POST
+JSON data containing messages/replies from user to AI
+
+```json
+{
+    "usermsg": "string"
+}
+```
+
 ### Story
 
 To setup the story of your adventure, create a .txt file with the story in a folder called "data" in the "src" folder. 
