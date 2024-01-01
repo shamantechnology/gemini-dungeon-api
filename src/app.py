@@ -33,55 +33,52 @@ with app.app_context():
     dt_run = datetime.now().strftime("%m%d%Y %H:%M:%s")
     logger.info(f"------ Starting Gemini Dungeon API @ {dt_run} ---------")
 
-@app.route("/dmstart")
+@app.route("/dmstart", methods=["POST"])
 def dmstart():
     """
     Starts the process and creates the first message and image
     """
-    if request.method.lower() == "options":
-        return Response()
-    elif request.method.lower() == "post":
-        user_msg = "Hello"
-        reply_dict = {"ai": "", "vision": "", "error": ""}
+    user_msg = "Hello"
+    reply_dict = {"ai": "", "vision": "", "error": ""}
 
-        caught_exception = False
+    caught_exception = False
 
-        try:
-            ai_resp = gdm.chat(user_msg=user_msg)
-        except Exception as err:
-            logger.error(err)
-            reply_dict["error"] = "system error"
-            reply_dict[
-                "ai"
-            ] = "I'm sorry but could you state that again? I have seem to caught an error."
-            caught_exception = True
+    try:
+        ai_resp = gdm.chat(user_msg=user_msg)
+    except Exception as err:
+        logger.error(err)
+        reply_dict["error"] = "system error"
+        reply_dict[
+            "ai"
+        ] = "I'm sorry but could you state that again? I have seem to caught an error."
+        caught_exception = True
 
-        try:
-            ai_json = json.loads(ai_resp)
-        except json.JSONDecodeError as err:
-            logger.error(err)
-            reply_dict["error"] = "system error - json failed from AI"
-            reply_dict[
-                "ai"
-            ] = "I'm sorry but could you state that again? I have seem to caught an error."
-            caught_exception = True
+    try:
+        ai_json = json.loads(ai_resp)
+    except json.JSONDecodeError as err:
+        logger.error(err)
+        reply_dict["error"] = "system error - json failed from AI"
+        reply_dict[
+            "ai"
+        ] = "I'm sorry but could you state that again? I have seem to caught an error."
+        caught_exception = True
 
-        try:
-            sapi_reply = sapi.generate_image(ai_json["view"])
-        except Exception as err:
-            logger.error(err)
-            reply_dict["error"] = "system error - stability failed"
-            reply_dict[
-                "ai"
-            ] = f"I'm sorry but could not generate you an image.\n{ai_json['content']}"
-            caught_exception = True
+    try:
+        sapi_reply = sapi.generate_image(ai_json["view"])
+    except Exception as err:
+        logger.error(err)
+        reply_dict["error"] = "system error - stability failed"
+        reply_dict[
+            "ai"
+        ] = f"I'm sorry but could not generate you an image.\n{ai_json['content']}"
+        caught_exception = True
 
-        if not caught_exception:
-            reply_dict["ai"] = ai_json["content"]
-            reply_dict["vision"] = sapi_reply["artifacts"][0]["base64"]
+    if not caught_exception:
+        reply_dict["ai"] = ai_json["content"]
+        reply_dict["vision"] = sapi_reply["artifacts"][0]["base64"]
 
-        json_reply = jsonify(reply_dict)
-        return make_response(json_reply, 200)
+    json_reply = jsonify(reply_dict)
+    return make_response(json_reply, 200)
 
 
 @app.route("/run", methods=["POST"])
