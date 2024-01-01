@@ -46,7 +46,7 @@ class Player:
             self.player.give_item(Item("shield"))
         elif self.player_class == "Wizard":
             self.player.give_item(Item("dagger"))
-        elif self.player_Class == "Bard":
+        elif self.player_class == "Bard":
             self.player.give_item(Item("longsword"))
         
         self.player.give_item(Item("explorers-pack"))
