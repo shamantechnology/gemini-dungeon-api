@@ -49,7 +49,7 @@ POST /dmstart
 ```json
 {
     "ai": "string, ai reply",
-    "vision": "string, ai generated image prompt",
+    "vision": "string, base64 png generated from AI prompt",
     "error": "any errors"
 }
 ```
@@ -68,7 +68,7 @@ POST /run
 ```json
 {
     "ai": "string, ai message or reply",
-    "vision": "string, ai generated image prompt",
+    "vision": "string, base64 png generated from AI prompt",
     "error": "any errors"
 }
 ```
