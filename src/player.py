@@ -56,3 +56,28 @@ class Player:
         Generate a player sheet for the AI to use
         """
         return str(self.player).replace("\n", " ")
+    
+    def player_info_avatar(self) -> dict:
+        """
+        Generate a player avatar and display player info
+        for use with the front end
+        """
+
+        stats_json = {
+            "name": self.player.name,
+            "class": self.player.class_name,
+            "level": self.player.level,
+            "race": self.player.race,
+            "alignment": self.player.alignment,
+            "strength": self.player.strength,
+            "dexterity": self.player.dexterity,
+            "constitution": self.player.constitution,
+            "intelligence": self.player.intelligence,
+            "wisdom": self.player.wisdom,
+            "charisma": self.player.charisma,
+            "hit_points": self.player.current_hp,  # Assuming a `current_hp` attribute
+            # Add other relevant stats as needed
+        }
+
+
+        

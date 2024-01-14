@@ -7,7 +7,10 @@ import logging
 
 logging.basicConfig(format="[%(asctime)s] %(name)s - %(levelname)s - %(message)s")
 
+import random
+
 from pathlib import Path
+import re
 from concurrent.futures import as_completed
 
 import faiss
@@ -32,21 +35,26 @@ class GeminiDM:
         self.conversation = None
         self.chain_recorder = None
 
+        # randomly pick campaign
+        self.campaign_file = Path(f"data/campaign{random.randint(1,8)}.txt")
+        campaign_txt = ""
+        with open(self.campaign_file) as ctf:
+            for cline in ctf.readlines():
+                campaign_txt += cline
+
         # setup logging
         self.class_logger = logging.getLogger(__name__)
         self.class_logger.setLevel(logging.DEBUG)
-
-        # get story
-        story_txt = ""
-        with open(self.story_path) as txtfile:
-            for tline in txtfile.readlines():
-                story_txt += tline
 
         # setup instruction prompt
         prompt_txt = ""
         with open(self.instruction_prompt_path) as txtfile:
             for tline in txtfile.readlines():
-                prompt_txt += tline
+                if re.findall(r"Synopsis\:$", tline):
+                    prompt_txt += tline
+                    prompt_txt += f"\n{campaign_txt}\n"
+                else:
+                    prompt_txt += tline
 
         # build prompt with player information and 
         # for the chat buffer
@@ -91,6 +99,7 @@ class GeminiDM:
             memory=self.memory,
             verbose=True,
         )
+
     def chat(self, user_msg: str) -> str:
         """
         String input to gemini chat from user

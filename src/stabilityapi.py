@@ -26,8 +26,8 @@ class StabilityAPI:
             json={
                 "text_prompts": [{"text": prompt}],
                 "cfg_scale": 30,
-                "height": 1024,
-                "width": 1024,
+                "height": 768,
+                "width": 1344,
                 "samples": 1,
                 "steps": 30,
             },
