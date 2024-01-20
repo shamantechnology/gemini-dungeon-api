@@ -29,7 +29,7 @@ with app.app_context():
     logger.info("starting stability.ai API")
     sapi = StabilityAPI()
 
-    # start med coder with api start
+    # start with api start
     dt_run = datetime.now().strftime("%m%d%Y %H:%M:%s")
     logger.info(f"------ Starting Gemini Dungeon API @ {dt_run} ---------")
 
@@ -77,6 +77,9 @@ def dmstart():
         reply_dict["ai"] = ai_json["content"]
         reply_dict["vision"] = sapi_reply["artifacts"][0]["base64"]
 
+    # give initial player stats
+    reply_dict["player_stats"] = gdm.player.player_info()
+    
     json_reply = jsonify(reply_dict)
     return make_response(json_reply, 200)
 
@@ -116,4 +119,11 @@ def run():
     reply_dict["vision"] = sapi_reply["artifacts"][0]["base64"]
     json_reply = jsonify(reply_dict)
     return make_response(json_reply, 201)
+
+@app.route("/playerstats", methods=["POST"])
+def playerstats():
+    return make_response(
+        jsonify(gdm.player.player_info()),
+        201
+    )
 

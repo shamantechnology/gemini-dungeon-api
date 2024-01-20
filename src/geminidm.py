@@ -58,9 +58,12 @@ class GeminiDM:
 
         # build prompt with player information and 
         # for the chat buffer
+        
+        # have to reformat dict as conversationchain will mistake
+        # it as a template variable
         prompt_txt += f"""
         Player Info:
-        {self.player.player_sheet()}\n"""
+        {{{self.player.player_info()}}}\n"""
 
         prompt_txt += """
         Current Conversation:
