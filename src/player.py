@@ -40,7 +40,7 @@ class Player:
                 Wizard(name=f"{self.player_first_name} {self.player_last_name}"),
             ),
             ("Monk", Monk(name=f"{self.player_first_name} {self.player_last_name}")),
-            ("Bard", Bard(name=f"{self.player_first_name} {self.player_last_name}")),
+            # ("Bard", Bard(name=f"{self.player_first_name} {self.player_last_name}")),
             ("Rouge", Bard(name=f"{self.player_first_name} {self.player_last_name}")),
             ("Druid", Bard(name=f"{self.player_first_name} {self.player_last_name}")),
         ]
