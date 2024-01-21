@@ -31,7 +31,7 @@ class GeminiDM:
         self.instruction_prompt_path = Path("prompts/dmstart.txt")
         self.story_path = Path("data/story.txt")
         self.player = player if player else Player()
-        self.llm = ChatGoogleGenerativeAI(temperature=0.1, model="gemini-pro")
+        self.llm = ChatGoogleGenerativeAI(temperature=0, model="gemini-pro")
         self.conversation = None
         self.chain_recorder = None
 
