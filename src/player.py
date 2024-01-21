@@ -18,9 +18,7 @@ logging.basicConfig(format="\n[%(asctime)s] %(name)s - %(levelname)s - %(message
 class Player:
     def __init__(self, first_name: str = "", last_name: str = ""):
         self.location = []
-        self.player_first_name = first_name if first_name != "" else "Player"
-        self.player_last_name = last_name if last_name != "" else "One"
-
+        
         if first_name and last_name:
             self.player_first_name = first_name
             self.player_last_name = last_name
