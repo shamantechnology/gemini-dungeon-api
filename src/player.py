@@ -7,7 +7,7 @@ Right now a base level 1 Paladin but will expand to make it customizable
 import random
 import logging
 
-from dnd_character.classes import Paladin, Wizard, Monk, Bard
+from dnd_character.classes import Paladin, Wizard, Monk, Bard, Rogue, Druid
 from dnd_character.equipment import Item
 
 import fantasynames
@@ -38,9 +38,9 @@ class Player:
                 Wizard(name=f"{self.player_first_name} {self.player_last_name}"),
             ),
             ("Monk", Monk(name=f"{self.player_first_name} {self.player_last_name}")),
-            # ("Bard", Bard(name=f"{self.player_first_name} {self.player_last_name}")),
-            ("Rouge", Bard(name=f"{self.player_first_name} {self.player_last_name}")),
-            ("Druid", Bard(name=f"{self.player_first_name} {self.player_last_name}")),
+            ("Bard", Bard(name=f"{self.player_first_name} {self.player_last_name}")),
+            ("Rouge", Rogue(name=f"{self.player_first_name} {self.player_last_name}")),
+            ("Druid", Druid(name=f"{self.player_first_name} {self.player_last_name}")),
         ]
 
         rand_player_select = random.choice(self.possible_players)
