@@ -57,7 +57,7 @@ class Player:
         if self.player_class == "Paladin":
             self.player.give_item(Item("longsword"))
             self.player.give_item(Item("shield"))
-        elif self.player_class == "Wizard":
+        elif self.player_class == "Wizard" or self.player_class == "Rouge":
             self.player.give_item(Item("dagger"))
         elif self.player_class == "Bard":
             self.player.give_item(Item("longsword"))

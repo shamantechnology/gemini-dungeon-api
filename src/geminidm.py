@@ -87,7 +87,7 @@ class GeminiDM:
         )
 
         # setup memory
-        retriever = self.vectorstore.as_retriever(search_kwargs=dict(k=3))
+        retriever = self.vectorstore.as_retriever(search_kwargs=dict(k=8))
         self.memory = VectorStoreRetrieverMemory(
             retriever=retriever
         )
