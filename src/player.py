@@ -133,6 +133,7 @@ class Player:
             "level": self.player.level,
             "hit_points": self.player.current_hp,
             "race": self.player.race,
+            "gender": self.player.gender,
             "alignment": self.player.alignment,
             "description": self.player.description,
             "background": self.player.background,

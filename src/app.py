@@ -25,6 +25,7 @@ with app.app_context():
 
     logger.info("Starting GeminiDM module")
     gdm = GeminiDM()
+    logger.info(f"DM started [{gdm.dm_id}]")
 
     logger.info("starting stability.ai API")
     sapi = StabilityAPI()
@@ -33,14 +34,11 @@ with app.app_context():
     dt_run = datetime.now().strftime("%m%d%Y %H:%M:%s")
     logger.info(f"------ Starting Gemini Dungeon API @ {dt_run} ---------")
 
-@app.route("/dmstart", methods=["POST"])
-def dmstart():
+def generate_content(user_msg: str="Hello") -> dict:
     """
-    Starts the process and creates the first message and image
+    Generate AI text and image from user_msg, if any
     """
-    user_msg = "Hello"
     reply_dict = {"ai": "", "vision": "", "error": ""}
-
     caught_exception = False
 
     try:
@@ -53,33 +51,51 @@ def dmstart():
         ] = "I'm sorry but could you state that again? I have seem to caught an error."
         caught_exception = True
 
-    try:
-        ai_json = json.loads(ai_resp)
-    except json.JSONDecodeError as err:
-        logger.error(err)
-        reply_dict["error"] = "system error - json failed from AI"
-        reply_dict[
-            "ai"
-        ] = "I'm sorry but could you state that again? I have seem to caught an error."
-        caught_exception = True
+    if not caught_exception:
+        try:
+            ai_json = json.loads(ai_resp)
+        except json.JSONDecodeError as err:
+            logger.error(err)
+            reply_dict["error"] = "system error - json failed from AI"
+            reply_dict[
+                "ai"
+            ] = "I'm sorry but could you state that again? I have seem to caught an error."
+            caught_exception = True
 
-    try:
-        sapi_reply = sapi.generate_image(ai_json["view"])
-    except Exception as err:
-        logger.error(err)
-        reply_dict["error"] = "system error - stability failed"
-        reply_dict[
-            "ai"
-        ] = f"I'm sorry but could not generate you an image.\n{ai_json['content']}"
-        caught_exception = True
+    if not caught_exception:
+        try:
+            logger.info(f"[image prompt] {ai_json['view']}")
+            sapi_reply = sapi.generate_image(ai_json["view"])
+        except Exception as err:
+            logger.error(err)
+            reply_dict["error"] = "system error - stability failed"
+            reply_dict["ai"] = f"I'm sorry but could not generate you an image.\n{ai_json['content']}"
+            caught_exception = True
 
     if not caught_exception:
         reply_dict["ai"] = ai_json["content"]
         reply_dict["vision"] = sapi_reply["artifacts"][0]["base64"]
 
+    return reply_dict
+
+
+@app.route("/dmstart", methods=["POST"])
+def dmstart():
+    """
+    Starts the process and creates the first message and image
+    """
+    reply_dict = generate_content()
+    
     # give initial player stats
     reply_dict["player_stats"] = gdm.player.player_info()
     
+    logger.info({
+        "from": "dmstart",
+        "user": "Hello",
+        "ai": reply_dict["ai"],
+        "vision": len(reply_dict["vision"])
+    })
+
     json_reply = jsonify(reply_dict)
     return make_response(json_reply, 200)
 
@@ -87,37 +103,17 @@ def dmstart():
 @app.route("/run", methods=["POST"])
 def run():
     user_msg = request.json["usermsg"]
-    reply_dict = {"ai": "", "vision": "", "error": ""}
-
-    try:
-        ai_resp = gdm.chat(user_msg=user_msg)
-    except Exception as err:
-        logger.error(err)
-        reply_dict["error"] = "system error"
-        json_reply = jsonify(reply_dict)
-        return make_response(json_reply, 500)
-
-    print(ai_resp)
-
-    try:
-        ai_json = json.loads(ai_resp)
-    except json.JSONDecodeError as err:
-        logger.error(err)
-        reply_dict["error"] = "system error - json failed from AI"
-        json_reply = jsonify(reply_dict)
-        return make_response(json_reply, 500)
-
-    try:
-        sapi_reply = sapi.generate_image(ai_json["view"])
-    except Exception as err:
-        logger.error(err)
-        reply_dict["error"] = "system error - stability failed"
-        json_reply = jsonify(reply_dict)
-        return make_response(json_reply, 500)
-
-    reply_dict["ai"] = ai_json["content"]
-    reply_dict["vision"] = sapi_reply["artifacts"][0]["base64"]
+    reply_dict = generate_content(user_msg)
+    
     json_reply = jsonify(reply_dict)
+
+    logger.info({
+        "from": "run",
+        "user": user_msg,
+        "ai": reply_dict["ai"],
+        "vision": len(reply_dict["vision"])
+    })
+
     return make_response(json_reply, 201)
 
 @app.route("/playerstats", methods=["POST"])

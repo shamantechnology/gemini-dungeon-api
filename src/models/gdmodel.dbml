@@ -1,0 +1,185 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+Table UserAccount {
+  id integer [primary key]
+  email varchar
+  name varchar
+  signon_method varchar
+  credits integer [default: 0]
+  active bool [default: false]
+  suspended bool [default: false]
+  login_at timestamp [default: `now()`]
+  created_at timestamp
+}
+
+Table UserSessions {
+  id integer [primary key]
+  user_id integer
+  token text
+  from_ip varchar
+  valid bool
+}
+
+Table Player {
+  id integer [primary key]
+  user_id integer
+  name varchar
+  created_at timestamp
+  updated_at timestamp [default: `now()`]
+}
+
+Table PlayerStats {
+  id integer [primary key]
+  player_id integer
+  proficiency_mod integer [default: 2]
+  level integer [default: 0]
+  hp integer
+  exp intger [default: 0]
+  str_mod integer
+  str_score integer
+  dex_mod integer
+  dex_score integer
+  con_mod integer
+  con_score integer
+  int_mod integer
+  int_score integer
+  wis_mod integer
+  wis_score integer
+  cha_mod integer
+  cha_score integer
+  armor_class integer
+  initiative integer
+  death_saves_success integer [default: 0]
+  death_saves_failed integer [default: 0]
+  hit_dice varchar
+  speed varchar
+  class varchar
+  sex varchar
+  race varchar
+  alignment varchar
+  personality_traits text
+  ideals text
+  bonds text
+  flaws text
+  languages text
+}
+
+Table PlayerFeaturesTraits {
+  id integer [primary key]
+  player_id integer
+  name varchar
+  description text
+}
+
+Table PlayerItems {
+  id integer [primary key]
+  player_id integer
+  item_id integer
+  amount integer
+}
+
+Table PlayerWeapons {
+  id integer [primary key]
+  player_id integer
+  item_id integer
+  proficient bool [default: false]
+  attack_bonus integer [default: 0]
+}
+
+Table PlayerBank {
+  id integer [primary key]
+  player_id integer
+  cp integer [default: 0]
+  sp integer [default: 0]
+  ep integer [default: 0]
+  gp integer [default: 0]
+  pp integer [default: 0]
+}
+
+Table NPC {
+  id integer [primary key]
+  world_id integer
+  name varchar
+  location text
+  created_at timestamp [default: `now()`]
+}
+
+Table NPCStats {
+  id integer [primary key]
+  npc_id integer
+  proficiency_mod integer [default: 2]
+  level integer [default: 0]
+  hp integer
+  exp intger [default: 0]
+  str_mod integer
+  str_score integer
+  dex_mod integer
+  dex_score integer
+  con_mod integer
+  con_score integer
+  int_mod integer
+  int_score integer
+  wis_mod integer
+  wis_score integer
+  cha_mod integer
+  cha_score integer
+  armor_class integer
+  initiative integer
+  death_saves_success integer [default: 0]
+  death_saves_failed integer [default: 0]
+  hit_dice varchar
+  speed varchar
+  class varchar
+  sex varchar
+  race varchar
+  alignment varchar
+  languages text
+}
+
+Table NPCFeaturesTraits {
+  id integer [primary key]
+  npc_id integer
+  name varchar
+  description text
+}
+
+Table NPCItems {
+  id integer [primary key]
+  npc_id integer
+  item_id integer
+  proficient bool
+  amount integer
+}
+
+Table NPCBank {
+  id integer [primary key]
+  npc_id integer
+  cp integer [default: 0]
+  sp integer [default: 0]
+  ep integer [default: 0]
+  gp integer [default: 0]
+  pp integer [default: 0]
+}
+
+Table NPCWeapons {
+  id integer [primary key]
+  npc_id integer
+  item_id integer
+  proficient bool [default: false]
+  attack_bonus integer [default: 0]
+}
+
+
+Ref: Player.user_id > UserAccount.id
+Ref: PlayerFeaturesTraits.player_id - Player.id
+Ref: PlayerStats.player_id - Player.id
+Ref: PlayerItems.player_id - Player.id
+Ref: PlayerBank.player_id - Player.id
+Ref: PlayerWeapons.player_id - Player.id
+
+Ref: NPCFeaturesTraits.npc_id - NPC.id
+Ref: NPCStats.npc_id - NPC.id
+Ref: NPCItems.npc_id - NPC.id
+Ref: NPCBank.npc_id - NPC.id
+Ref: NPCWeapons.npc_id - NPC.id

@@ -8,7 +8,7 @@ import logging
 logging.basicConfig(format="[%(asctime)s] %(name)s - %(levelname)s - %(message)s")
 
 import random
-
+import uuid
 from pathlib import Path
 import re
 from concurrent.futures import as_completed
@@ -34,6 +34,7 @@ class GeminiDM:
         self.llm = ChatGoogleGenerativeAI(temperature=0, model="gemini-pro")
         self.conversation = None
         self.chain_recorder = None
+        self.dm_id = str(uuid.uuid4()).replace("-", "")
 
         # randomly pick campaign
         self.campaign_file = Path(f"data/campaign{random.randint(1,8)}.txt")
@@ -93,7 +94,7 @@ class GeminiDM:
         )
 
         # add blank context to kickstart things
-        self.memory.save_context({"input": ""},{"output": ""})
+        # self.memory.save_context({"input": ""},{"output": ""})
 
         # creating llm chain
         self.conversation = ConversationChain(

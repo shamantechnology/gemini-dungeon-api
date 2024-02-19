@@ -17,8 +17,3 @@ Constraints:
     "content": "what you are saying to the player as the DM",
     "view": "describe what the player should be viewing in a prompt format for stable diffusion. Use art styles like Frank Frazetta and Michael Whelan."
 }}
-
-Current conversation:
-{history}
-Human: {input}
-AI:
