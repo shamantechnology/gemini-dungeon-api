@@ -15,6 +15,16 @@ make virtualenv
 ```
 this ensures that all requirements are pinned and work together for ensuring reproducibility
 
+### Gemini AI Google setup
+
+If running this with Gemini, you have to setup authentication with gcloud cli
+
+```console
+$ gcloud auth login 
+$ gcloud config set project YOUR_PROJECT_ID
+$ gcloud auth application-default login
+```
+
 ### Running
 
 To run the API, it is suggested to use something like uwsgi or gunicorn. We use [gunicorn](https://docs.gunicorn.org/en/stable/run.html).
