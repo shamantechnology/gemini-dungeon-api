@@ -26,7 +26,12 @@ class Player:
             # using fantasy human names
             ffull_name = fantasynames.human().split(" ")
             self.player_first_name = ffull_name[0]
-            self.player_last_name = ffull_name[1]
+
+            if ffull_name[1] == "of":
+                self.player_first_name += f" {ffull_name[1]}"
+                self.player_last_name = ffull_name[2]
+            else:
+                self.player_last_name = ffull_name[1]
 
         self.possible_players = [
             (
