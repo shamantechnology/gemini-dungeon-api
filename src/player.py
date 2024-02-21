@@ -22,24 +22,25 @@ class Player:
         char_class: str = "",
         race: str = "",
         alignment: str = "",
-        level: int = 1,
-        hit_points: int = 5,
+        level: int = -1,
+        hit_points: int = -1,
         gender: str = "",
         description: str = "",
         background: str = "",
-        strength: int = 15,
-        dexterity: int = 14,
-        constitution: int = 13,
-        intelligence: int = 12,
-        wisdom: int = 10,
-        charisma: int = 8,
-        age: int = 18
+        strength: int = -1,
+        dexterity: int = -1,
+        constitution: int = -1,
+        intelligence: int = -1,
+        wisdom: int = -1,
+        charisma: int = -1,
+        age: int = -1
     ):
         # add in location tracking after adding in worlds
         # table
         # self.location = []
         
-        if first_name and last_name:
+        # set player first name and last name
+        if first_name != "" and last_name != "":
             self.player_first_name = first_name
             self.player_last_name = last_name
         else:
@@ -52,30 +53,31 @@ class Player:
                 self.player_last_name = ffull_name[2]
             else:
                 self.player_last_name = ffull_name[1]
-
-        if not char_class:
-            self.possible_players = [
-                (
-                    "Paladin",
-                    Paladin(name=f"{self.player_first_name} {self.player_last_name}"),
-                ),
-                (
-                    "Wizard",
-                    Wizard(name=f"{self.player_first_name} {self.player_last_name}"),
-                ),
-                ("Monk", Monk(name=f"{self.player_first_name} {self.player_last_name}")),
-                ("Bard", Bard(name=f"{self.player_first_name} {self.player_last_name}")),
-                ("Rouge", Rogue(name=f"{self.player_first_name} {self.player_last_name}")),
-                ("Druid", Druid(name=f"{self.player_first_name} {self.player_last_name}")),
-            ]
-
+        
+        # set player class
+        self.possible_players = [
+            (
+                "Paladin",
+                Paladin(name=f"{self.player_first_name} {self.player_last_name}"),
+            ),
+            (
+                "Wizard",
+                Wizard(name=f"{self.player_first_name} {self.player_last_name}"),
+            ),
+            ("Monk", Monk(name=f"{self.player_first_name} {self.player_last_name}")),
+            ("Bard", Bard(name=f"{self.player_first_name} {self.player_last_name}")),
+            ("Rouge", Rogue(name=f"{self.player_first_name} {self.player_last_name}")),
+            ("Druid", Druid(name=f"{self.player_first_name} {self.player_last_name}")),
+        ]
+        
+        if char_class != "":
+            self.player_class = char_class
+            pplayer = [x for x in self.possible_players if x[0] == self.player_class][0]
+            self.dndc = pplayer[1]
+        else:
             rand_player_select = random.choice(self.possible_players)
             self.player_class = rand_player_select[0]
-            self.player = rand_player_select[1]
-        else:
-            self.player_class = char_class
-            pplayer = [x for x in self.possible_players if x[0] == self.player_class]
-            self.player = pplayer[1]
+            self.dndc = rand_player_select[1]
 
         # setup logging
         self.class_logger = logging.getLogger(__name__)
@@ -84,18 +86,43 @@ class Player:
         # give players starting equipment
         # need to add loading from item database by session
         if self.player_class == "Paladin":
-            self.player.give_item(Item("longsword"))
-            self.player.give_item(Item("shield"))
+            self.dndc.give_item(Item("longsword"))
+            self.dndc.give_item(Item("shield"))
         elif self.player_class == "Wizard" or self.player_class == "Rouge":
-            self.player.give_item(Item("dagger"))
+            self.dndc.give_item(Item("dagger"))
         elif self.player_class == "Bard":
-            self.player.give_item(Item("longsword"))
+            self.dndc.give_item(Item("longsword"))
 
-        self.player.give_item(Item("explorers-pack"))
+        self.dndc.give_item(Item("explorers-pack"))
+
+        # set stats if any set
+        if level > 0:
+            self.dndc.level = level
+        
+        if hit_points > 0:
+            self.dndc.current_hp = hit_points
+
+        if strength >= 0:
+            self.dndc.strength = strength
+
+        if dexterity >= 0:
+            self.dndc.dexterity = dexterity
+
+        if constitution >= 0:
+            self.dndc.constitution = constitution
+
+        if intelligence >= 0:
+            self.dndc.intelligence = intelligence
+
+        if wisdom >= 0:
+            self.dndc.wisdom = wisdom
+
+        if charisma >= 0:
+            self.dndc.charisma = charisma
 
         # set player race
-        if race:
-            self.player.race = race
+        if race != "":
+            self.dndc.race = race
         else:
             dnd_races = [
                 "Human",
@@ -108,56 +135,68 @@ class Player:
                 "Tiefling",
                 "Dragonborn",
             ]
-            self.player.race = random.choice(dnd_races)
+            self.dndc.race = random.choice(dnd_races)
 
         # set player alignment
-        if alignment:
-            self.player.alignment = alignment
+        if alignment != "":
+            self.dndc.alignment = alignment
         else:
             dnd_alignments = ["LG", "NG", "CG", "LN", "TN", "CN", "LE", "NE", "CE"]
-            self.player.alignment = random.choice(dnd_alignments)
+            self.dndc.alignment = random.choice(dnd_alignments)
 
         # set player age
-        self.player.age = random.randint(18, 300)
+        if age >= 0:
+            self.dndc.age = age
+        else:
+            self.dndc.age = random.randint(18, 300)
 
         # set player gender
-        self.player.gender = random.choice(["Male", "Female"])
+        if gender != "":
+            self.dndc.gender = gender
+        else:
+            self.dndc.gender = random.choice(["Male", "Female"])
 
         # set player background
-        dnd_backgrounds = [
-            "Novice Adventurer",
-            "Caring Medical Doctor",
-            "Cheating Theif",
-            "Depressed Traveling Musician",
-            "Optimistic Scientst",
-            "Town Square Influencer",
-            "Haunted Librarian Scholar",
-            "Wandering Folk Hero",
-            "Cunning Street Urchin",
-            "Mysterious Court Jester",
-            "Arcane Eldritch Investigator",
-            "Noble Wilderness Tracker",
-            "Sneaky Pirate Captain",
-            "Divine Acolyte of Light",
-            "Enigmatic Shadowy Infiltrator",
-        ]
-        self.player.background = random.choice(dnd_backgrounds)
+        if background != "":
+            self.dndc.background = background
+        else:
+            dnd_backgrounds = [
+                "Novice Adventurer",
+                "Caring Medical Doctor",
+                "Cheating Theif",
+                "Depressed Traveling Musician",
+                "Optimistic Scientst",
+                "Town Square Influencer",
+                "Haunted Librarian Scholar",
+                "Wandering Folk Hero",
+                "Cunning Street Urchin",
+                "Mysterious Court Jester",
+                "Arcane Eldritch Investigator",
+                "Noble Wilderness Tracker",
+                "Sneaky Pirate Captain",
+                "Divine Acolyte of Light",
+                "Enigmatic Shadowy Infiltrator",
+            ]
+            self.dndc.background = random.choice(dnd_backgrounds)
 
         # set player descriptions
-        dnd_descriptions = [
-            "Mysterious wanderer with a dark past",
-            "Energetic and optimistic aspiring hero",
-            "Wise sage with ancient knowledge",
-            "Sly and cunning trickster",
-            "Noble with a strong sense of duty",
-            "Fearless and battle-hardened warrior",
-            "Enigmatic spellcaster with arcane secrets",
-            "Curious explorer always seeking adventure",
-            "Loyal and protective guardian of the weak",
-            "Charismatic and charming diplomat",
-            "Brooding loner haunted by inner demons",
-        ]
-        self.player.description = random.choice(dnd_descriptions)
+        if description != "":
+            self.dndc.description = description
+        else:
+            dnd_descriptions = [
+                "Mysterious wanderer with a dark past",
+                "Energetic and optimistic aspiring hero",
+                "Wise sage with ancient knowledge",
+                "Sly and cunning trickster",
+                "Noble with a strong sense of duty",
+                "Fearless and battle-hardened warrior",
+                "Enigmatic spellcaster with arcane secrets",
+                "Curious explorer always seeking adventure",
+                "Loyal and protective guardian of the weak",
+                "Charismatic and charming diplomat",
+                "Brooding loner haunted by inner demons",
+            ]
+            self.dndc.description = random.choice(dnd_descriptions)
 
     def player_info(self) -> dict:
         """
@@ -165,21 +204,30 @@ class Player:
         """
 
         stats_json = {
-            "name": self.player.name,
-            "class": self.player.class_name,
-            "level": self.player.level,
-            "hit_points": self.player.current_hp,
-            "race": self.player.race,
-            "gender": self.player.gender,
-            "alignment": self.player.alignment,
-            "description": self.player.description,
-            "background": self.player.background,
-            "strength": self.player.strength,
-            "dexterity": self.player.dexterity,
-            "constitution": self.player.constitution,
-            "intelligence": self.player.intelligence,
-            "wisdom": self.player.wisdom,
-            "charisma": self.player.charisma,
+            "name": self.dndc.name,
+            "class": self.dndc.class_name,
+            "level": self.dndc.level,
+            "hit_points": self.dndc.current_hp,
+            "race": self.dndc.race,
+            "gender": self.dndc.gender,
+            "alignment": self.dndc.alignment,
+            "description": self.dndc.description,
+            "background": self.dndc.background,
+            "strength": self.dndc.strength,
+            "dexterity": self.dndc.dexterity,
+            "constitution": self.dndc.constitution,
+            "intelligence": self.dndc.intelligence,
+            "wisdom": self.dndc.wisdom,
+            "charisma": self.dndc.charisma,
         }
 
         return stats_json
+
+    def __str__(self):
+        pinfo = ""
+        pstats = self.player_info()
+
+        for k, v in pstats.items():
+            pinfo += f"{k}: {v}\n"
+        
+        return pinfo

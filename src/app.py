@@ -4,7 +4,7 @@ Gemini Dungeon API
 Game logic, chat and image generation api for gemini-dungeon frontend
 """
 from datetime import datetime
-from flask import Flask, request, jsonify, make_response, Response
+from flask import Flask, request, jsonify, make_response, redirect
 from flask_cors import CORS
 import logging
 import json
@@ -38,7 +38,7 @@ gdm = None
 with app.app_context():
     # run this to initially create database
     # will create a python script to run this
-    db.create_all()
+    # db.create_all()
 
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
@@ -57,7 +57,7 @@ with app.app_context():
     dt_run = datetime.now().strftime("%m%d%Y %H:%M:%s")
     logger.info(f"------ Starting Gemini Dungeon API @ {dt_run} ---------")
 
-def generate_content(user_msg: str="Hello", session_id: str=None, player: any=None) -> dict:
+def generate_content(user_msg: str="Hello", session_id: str=None, player: Player=None) -> str:
     """
     Generate AI text and image from user_msg, if any
     """
@@ -67,7 +67,11 @@ def generate_content(user_msg: str="Hello", session_id: str=None, player: any=No
     try:
         if session_id and player:
             logger.info(f"Starting session [{session_id}]")
-            ai_resp = gdm.chat(user_msg=user_msg, session_id=session_id, player=player)
+            ai_resp = gdm.chat(
+                user_msg=user_msg,
+                session_id=session_id,
+                player=player
+            )
         else:
             logger.info("No session_id or player, starting a new session")
             ai_resp = gdm.chat(user_msg=user_msg)
@@ -116,24 +120,25 @@ def dmstart():
     reply_dict = generate_content()
 
     # save player information
+    print(f"\n---Saveing to player model: {str(gdm.player)}\n")
     player = PlayerModel(
         first_name=gdm.player.player_first_name,
         last_name=gdm.player.player_last_name,
         char_class=gdm.player.player_class,
-        race=gdm.player.race,
-        alignment=gdm.player.alignment,
-        level=gdm.player.level,
-        hit_points=gdm.player.current_hp,
-        gender=gdm.player.gender,
-        description=gdm.player.description,
-        background=gdm.player.background,
-        strength=gdm.player.strength,
-        dexterity=gdm.player.dexterity,
-        constitution=gdm.player.constitution,
-        intelligence=gdm.player.intelligence,
-        wisdom=gdm.player.wisdom,
-        charisma=gdm.player.charisma,
-        age=gdm.player.age
+        race=gdm.player.dndc.race,
+        alignment=gdm.player.dndc.alignment,
+        level=gdm.player.dndc.level,
+        hit_points=gdm.player.dndc.current_hp,
+        gender=gdm.player.dndc.gender,
+        description=gdm.player.dndc.description,
+        background=gdm.player.dndc.background,
+        strength=gdm.player.dndc.strength,
+        dexterity=gdm.player.dndc.dexterity,
+        constitution=gdm.player.dndc.constitution,
+        intelligence=gdm.player.dndc.intelligence,
+        wisdom=gdm.player.dndc.wisdom,
+        charisma=gdm.player.dndc.charisma,
+        age=gdm.player.dndc.age
     )
 
     db.session.add(player)
@@ -174,16 +179,42 @@ def run():
 
     if session_id == "" or session_id is None:
         return make_response(
-            jsonify({"error": "no session id found"}),
-            500
+            jsonify({"error": "no session id found", "type": 0}),
+            400
+        )
+    
+    # check if valid session_id
+    session_query = PlayerSession.query.filter_by(session_id=session_id).first()
+    if not session_query:
+        return make_response(
+            jsonify({"error": "no session id found", "type": 0}),
+            400
         )
 
     # get player information from session id
-    player_query = PlayerModel.query.filter_by(session_id=session_id).first()
+    player_query = PlayerModel.query.filter_by(id=session_query.player_id).first()
     player = Player(
-        first_name=player_query.first_name
+        first_name=player_query.first_name,
+        last_name=player_query.last_name,
+        char_class=player_query.char_class,
+        race=player_query.race,
+        alignment=player_query.alignment,
+        level=player_query.level,
+        hit_points=player_query.hit_points,
+        strength=player_query.strength,
+        dexterity=player_query.dexterity,
+        constitution=player_query.constitution,
+        intelligence=player_query.intelligence,
+        wisdom=player_query.wisdom,
+        charisma=player_query.charisma,
+        age=player_query.age,
+        gender=player_query.gender,
+        background=player_query.background,
+        description=player_query.description
     )
-    reply_dict = generate_content(user_msg, session_id)
+
+    reply_dict = generate_content(user_msg, session_id, player)
+    reply_dict["player_stats"] = player.player_info()
     
     json_reply = jsonify(reply_dict)
 

@@ -45,12 +45,11 @@ class GeminiDM:
         self.class_logger = logging.getLogger(__name__)
         self.class_logger.setLevel(logging.DEBUG)
 
-    def chat(self, user_msg: str, session_id: str = None, player: any = None):
+    def chat(self, user_msg: str, session_id: str = None, player: Player=None) -> str:
         """
         Initialize conversation and memory per session
         Initialize player information, if needed
         """
-
         if not session_id:
             self.session_id = str(uuid.uuid4()).replace("-", "")
 
@@ -120,6 +119,7 @@ class GeminiDM:
 
         resp = self.conversation.invoke(user_msg)
         self.class_logger.info(f"ai raw response: {resp['response']}")
+        
         return resp["response"]
 
 
