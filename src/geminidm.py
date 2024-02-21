@@ -30,7 +30,6 @@ class GeminiDM:
         self.instruction_prompt_path = Path("prompts/dmstart.txt")
         self.story_path = Path("data/story.txt")
         self.player = None
-        self.player_sessions = {} # replace with database
         self.llm = ChatGoogleGenerativeAI(temperature=0, model="gemini-pro")
         self.conversation = None
         self.chain_recorder = None
@@ -57,8 +56,6 @@ class GeminiDM:
             # connect player or player character to session
             self.class_logger.info(f"Creating new player [session: {self.session_id}]")
             self.player = Player()
-
-            self.player_sessions[self.session_id] = self.player
         else:
             self.session_id = session_id
             self.player = player
