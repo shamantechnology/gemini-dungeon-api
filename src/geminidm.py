@@ -45,7 +45,7 @@ class GeminiDM:
         self.class_logger = logging.getLogger(__name__)
         self.class_logger.setLevel(logging.DEBUG)
 
-    def chat(self, user_msg: str, session_id: str = None):
+    def chat(self, user_msg: str, session_id: str = None, player: any = None):
         """
         Initialize conversation and memory per session
         Initialize player information, if needed
@@ -62,7 +62,7 @@ class GeminiDM:
             self.player_sessions[self.session_id] = self.player
         else:
             self.session_id = session_id
-            self.player = self.player_sessions[self.session_id]
+            self.player = player
 
         # setup redis chat history
         self.hkey_prefix = f"message_store_{self.session_id}"

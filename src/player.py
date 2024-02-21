@@ -16,8 +16,28 @@ logging.basicConfig(format="\n[%(asctime)s] %(name)s - %(levelname)s - %(message
 
 
 class Player:
-    def __init__(self, first_name: str = "", last_name: str = ""):
-        self.location = []
+    def __init__(self,
+        first_name: str = "",
+        last_name: str = "",
+        char_class: str = "",
+        race: str = "",
+        alignment: str = "",
+        level: int = 1,
+        hit_points: int = 5,
+        gender: str = "",
+        description: str = "",
+        background: str = "",
+        strength: int = 15,
+        dexterity: int = 14,
+        constitution: int = 13,
+        intelligence: int = 12,
+        wisdom: int = 10,
+        charisma: int = 8,
+        age: int = 18
+    ):
+        # add in location tracking after adding in worlds
+        # table
+        # self.location = []
         
         if first_name and last_name:
             self.player_first_name = first_name
@@ -33,30 +53,36 @@ class Player:
             else:
                 self.player_last_name = ffull_name[1]
 
-        self.possible_players = [
-            (
-                "Paladin",
-                Paladin(name=f"{self.player_first_name} {self.player_last_name}"),
-            ),
-            (
-                "Wizard",
-                Wizard(name=f"{self.player_first_name} {self.player_last_name}"),
-            ),
-            ("Monk", Monk(name=f"{self.player_first_name} {self.player_last_name}")),
-            ("Bard", Bard(name=f"{self.player_first_name} {self.player_last_name}")),
-            ("Rouge", Rogue(name=f"{self.player_first_name} {self.player_last_name}")),
-            ("Druid", Druid(name=f"{self.player_first_name} {self.player_last_name}")),
-        ]
+        if not char_class:
+            self.possible_players = [
+                (
+                    "Paladin",
+                    Paladin(name=f"{self.player_first_name} {self.player_last_name}"),
+                ),
+                (
+                    "Wizard",
+                    Wizard(name=f"{self.player_first_name} {self.player_last_name}"),
+                ),
+                ("Monk", Monk(name=f"{self.player_first_name} {self.player_last_name}")),
+                ("Bard", Bard(name=f"{self.player_first_name} {self.player_last_name}")),
+                ("Rouge", Rogue(name=f"{self.player_first_name} {self.player_last_name}")),
+                ("Druid", Druid(name=f"{self.player_first_name} {self.player_last_name}")),
+            ]
 
-        rand_player_select = random.choice(self.possible_players)
-        self.player_class = rand_player_select[0]
-        self.player = rand_player_select[1]
+            rand_player_select = random.choice(self.possible_players)
+            self.player_class = rand_player_select[0]
+            self.player = rand_player_select[1]
+        else:
+            self.player_class = char_class
+            pplayer = [x for x in self.possible_players if x[0] == self.player_class]
+            self.player = pplayer[1]
 
         # setup logging
         self.class_logger = logging.getLogger(__name__)
         self.class_logger.setLevel(logging.DEBUG)
 
         # give players starting equipment
+        # need to add loading from item database by session
         if self.player_class == "Paladin":
             self.player.give_item(Item("longsword"))
             self.player.give_item(Item("shield"))
@@ -68,22 +94,28 @@ class Player:
         self.player.give_item(Item("explorers-pack"))
 
         # set player race
-        dnd_races = [
-            "Human",
-            "Elf",
-            "Dwarf",
-            "Halfling",
-            "Gnome",
-            "Half-Elf",
-            "Half-Orc",
-            "Tiefling",
-            "Dragonborn",
-        ]
-        self.player.race = random.choice(dnd_races)
+        if race:
+            self.player.race = race
+        else:
+            dnd_races = [
+                "Human",
+                "Elf",
+                "Dwarf",
+                "Halfling",
+                "Gnome",
+                "Half-Elf",
+                "Half-Orc",
+                "Tiefling",
+                "Dragonborn",
+            ]
+            self.player.race = random.choice(dnd_races)
 
         # set player alignment
-        dnd_alignments = ["LG", "NG", "CG", "LN", "TN", "CN", "LE", "NE", "CE"]
-        self.player.alignment = random.choice(dnd_alignments)
+        if alignment:
+            self.player.alignment = alignment
+        else:
+            dnd_alignments = ["LG", "NG", "CG", "LN", "TN", "CN", "LE", "NE", "CE"]
+            self.player.alignment = random.choice(dnd_alignments)
 
         # set player age
         self.player.age = random.randint(18, 300)
