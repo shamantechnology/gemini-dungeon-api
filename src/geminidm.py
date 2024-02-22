@@ -118,13 +118,3 @@ class GeminiDM:
         self.class_logger.info(f"ai raw response: {resp['response']}")
         
         return resp["response"]
-
-
-    # def chat(self, user_msg: str) -> str:
-    #     """
-    #     String input to gemini chat from user
-    #     Record chat interaction and test for conciseness with TruLens
-    #     """
-    #     resp = self.conversation.invoke(user_msg)
-    #     self.class_logger.info(f"ai raw response: {resp['response']}")
-    #     return resp["response"]
