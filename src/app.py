@@ -9,6 +9,7 @@ from flask_cors import CORS
 import logging
 import json
 import os
+import uuid
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -65,18 +66,14 @@ def generate_content(user_msg: str="Hello", session_id: str=None, player: Player
     caught_exception = False
 
     try:
-        if session_id and player:
-            logger.info(f"Starting session [{session_id}]")
-            ai_resp = gdm.chat(
-                user_msg=user_msg,
-                session_id=session_id,
-                player=player
-            )
-        else:
-            logger.info("No session_id or player, starting a new session")
-            ai_resp = gdm.chat(user_msg=user_msg)
+        logger.info(f"Starting session [{session_id}]")
+        ai_resp = gdm.chat(
+            user_msg=user_msg,
+            session_id=session_id,
+            player=player
+        )
     except Exception as err:
-        logger.error(err)
+        logger.error(f"generate_content err 1: {err}")
         reply_dict["error"] = "system error"
         reply_dict["ai"] = "I'm sorry but could you state that again? I have seem to caught an error."
         caught_exception = True
@@ -85,7 +82,7 @@ def generate_content(user_msg: str="Hello", session_id: str=None, player: Player
         try:
             ai_json = json.loads(ai_resp)
         except json.JSONDecodeError as err:
-            logger.error(err)
+            logger.error(f"generate_content err 2: {err}")
             reply_dict["error"] = "system error - json failed from AI"
             reply_dict["ai"] = "I'm sorry but could you state that again? I have seem to caught an error."
             reply_dict["session_id"] = gdm.session_id
@@ -96,7 +93,7 @@ def generate_content(user_msg: str="Hello", session_id: str=None, player: Player
             logger.info(f"[image prompt] {ai_json['view']}")
             sapi_reply = sapi.generate_image(ai_json["view"])
         except Exception as err:
-            logger.error(err)
+            logger.error(f"generate_content err 3: {err}")
             reply_dict["error"] = "system error - stability failed"
             reply_dict["ai"] = ai_json['content']
             reply_dict["session_id"] = gdm.session_id
@@ -116,45 +113,51 @@ def dmstart():
     Start DM chat session, starts the adventure and creates the first message and image
     """
 
-    # generate a player session id
-    reply_dict = generate_content()
+    # create and save new session id
+    new_session_id = str(uuid.uuid4()).replace("-", "")
 
-    # save player information
-    print(f"\n---Saveing to player model: {str(gdm.player)}\n")
-    player = PlayerModel(
-        first_name=gdm.player.player_first_name,
-        last_name=gdm.player.player_last_name,
-        char_class=gdm.player.player_class,
-        race=gdm.player.dndc.race,
-        alignment=gdm.player.dndc.alignment,
-        level=gdm.player.dndc.level,
-        hit_points=gdm.player.dndc.current_hp,
-        gender=gdm.player.dndc.gender,
-        description=gdm.player.dndc.description,
-        background=gdm.player.dndc.background,
-        strength=gdm.player.dndc.strength,
-        dexterity=gdm.player.dndc.dexterity,
-        constitution=gdm.player.dndc.constitution,
-        intelligence=gdm.player.dndc.intelligence,
-        wisdom=gdm.player.dndc.wisdom,
-        charisma=gdm.player.dndc.charisma,
-        age=gdm.player.dndc.age
+    # create new player
+    player_obj = Player()
+
+     # save player information
+    print(f"\n---Saveing to player model: {str(player_obj)}\n")
+    new_player = PlayerModel(
+        first_name=player_obj.player_first_name,
+        last_name=player_obj.player_last_name,
+        char_class=player_obj.player_class,
+        race=player_obj.dndc.race,
+        alignment=player_obj.dndc.alignment,
+        level=player_obj.dndc.level,
+        hit_points=player_obj.dndc.current_hp,
+        gender=player_obj.dndc.gender,
+        description=player_obj.dndc.description,
+        background=player_obj.dndc.background,
+        strength=player_obj.dndc.strength,
+        dexterity=player_obj.dndc.dexterity,
+        constitution=player_obj.dndc.constitution,
+        intelligence=player_obj.dndc.intelligence,
+        wisdom=player_obj.dndc.wisdom,
+        charisma=player_obj.dndc.charisma,
+        age=player_obj.dndc.age
     )
 
-    db.session.add(player)
+    db.session.add(new_player)
     db.session.commit()
 
     # save session information
     player_session = PlayerSession(
-        session_id=reply_dict["session_id"],
-        player_id=player.id
+        session_id=new_session_id,
+        player_id=new_player.id
     )
 
     db.session.add(player_session)
     db.session.commit()
+
+    # generate a player session id
+    reply_dict = generate_content(session_id=new_session_id, player=player_obj)
     
     # give initial player stats
-    reply_dict["player_stats"] = gdm.player.player_info()
+    reply_dict["player_stats"] = player_obj.player_info()
     
     log_info = {
         "from": f"dmstart",
