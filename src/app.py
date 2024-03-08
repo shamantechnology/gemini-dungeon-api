@@ -101,9 +101,14 @@ def generate_content(user_msg: str="Hello", session_id: str=None, player: Player
 
     if not caught_exception:
         reply_dict["ai"] = ai_json["content"]
-        reply_dict["vision"] = sapi_reply["artifacts"][0]["base64"]
         reply_dict["session_id"] = gdm.session_id
 
+        if len(sapi_reply["artifacts"]) > 0:
+            reply_dict["vision"] = sapi_reply["artifacts"][0]["base64"]
+        else:
+            reply_dict["error"] = f"sapi artifact out of range: {sapi_reply}"
+            logger.error(f"{reply_dict}")
+            
     return reply_dict
 
 
