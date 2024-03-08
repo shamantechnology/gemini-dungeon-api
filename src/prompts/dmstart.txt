@@ -15,5 +15,5 @@ Constraints:
 - Only reply in the following JSON format. Make sure it does not cause an error when converting from text to JSON via the JSON python library
 {{
     "content": "what you are saying to the player as the DM",
-    "view": "describe what the player should be viewing in a prompt format for stable diffusion. Use art styles like Frank Frazetta and Michael Whelan."
+    "view": "Create an artistic image prompt that describes what the player should be viewing. Use realistic, cartoonish, glossy, fantasy and sci-fi type of art styles."
 }}
