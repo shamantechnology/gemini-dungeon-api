@@ -23,6 +23,8 @@ from models.player import Player as PlayerModel
 from models.player_session import PlayerSession
 
 logging.basicConfig(format="[%(asctime)s] %(name)s - %(levelname)s - %(message)s")
+logger = logging.getLogger("gdm_server")
+logger.setLevel(logging.DEBUG)
 
 app = Flask(__name__)
 CORS(app)
@@ -40,9 +42,6 @@ with app.app_context():
     # run this to initially create database
     # will create a python script to run this
     # db.create_all()
-
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
 
     if not sapi:
         logger.info("starting stability.ai API")
@@ -225,6 +224,9 @@ def run():
     reply_dict["player_stats"] = player.player_info()
     
     json_reply = jsonify(reply_dict)
+
+    if "action" in reply_dict:
+        logger.info(f"Action called: {reply_dict['action']}")
 
     logger.info({
         "from": f"run",

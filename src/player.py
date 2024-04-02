@@ -48,7 +48,7 @@ class Player:
             ffull_name = fantasynames.human().split(" ")
             self.player_first_name = ffull_name[0]
 
-            if ffull_name[1] == "of":
+            if ffull_name[1] == "of" or ffull_name[1] == "de":
                 self.player_first_name += f" {ffull_name[1]}"
                 self.player_last_name = ffull_name[2]
             else:
@@ -205,6 +205,7 @@ class Player:
 
         stats_json = {
             "name": self.dndc.name,
+            "age": self.dndc.age,
             "class": self.dndc.class_name,
             "level": self.dndc.level,
             "hit_points": self.dndc.current_hp,
