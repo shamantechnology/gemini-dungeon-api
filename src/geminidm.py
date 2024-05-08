@@ -30,7 +30,7 @@ logging.basicConfig(format="[%(asctime)s] %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger("gdm_server")
 
 class GeminiDM:
-    def __init__(self, llm: str="openai"):
+    def __init__(self):
         self.dm_id = str(uuid.uuid4()).replace("-", "")
         self.instruction_prompt_path = Path("prompts/dmstart.txt")
         self.story_path = Path("data/story.txt")
@@ -46,12 +46,15 @@ class GeminiDM:
         self.campaign_file = Path(f"data/campaign{random.randint(1,8)}.txt")
 
         # setup llm
-        if llm == "google":
-            self.llm = ChatGoogleGenerativeAI(temperature=0, model="gemini-pro")
-            self.embedding = VertexAIEmbeddings(model_name="textembedding-gecko@001")
-        elif llm == "openai":
-            self.llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo")
-            self.embedding = OpenAIEmbeddings(model="text-embedding-ada-002")
+        llm_provider = os.environ["LLM_PROVIDER"]
+        llm_model = os.environ["LLM_MODEL"]
+        llm_embedding_model = os.environ["LLM_EMBEDDING_MODEL"]
+        if llm_provider == "google":
+            self.llm = ChatGoogleGenerativeAI(temperature=0, model=llm_model)
+            self.embedding = VertexAIEmbeddings(model_name=llm_embedding_model)
+        elif llm_provider == "openai":
+            self.llm = ChatOpenAI(temperature=0, model=llm_model)
+            self.embedding = OpenAIEmbeddings(model=llm_embedding_model)
 
     def chat(self, user_msg: str, session_id: str = None, player: Player=None) -> str:
         """
