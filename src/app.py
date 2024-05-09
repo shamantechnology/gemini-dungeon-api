@@ -50,7 +50,7 @@ with app.app_context():
     if not gdm:
         # start DM
         logger.info(f"starting gemini dm")
-        gdm = GeminiDM(llm=os.getenv("LLM_PROVIDER"))
+        gdm = GeminiDM()
         logger.info(f"New DM - {gdm.dm_id}")
 
     # start with api start
