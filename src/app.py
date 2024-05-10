@@ -123,7 +123,7 @@ def dmstart():
     # create new player
     player_obj = Player()
 
-     # save player information
+    # save player information to database
     print(f"\n---Saveing to player model: {str(player_obj)}\n")
     new_player = PlayerModel(
         first_name=player_obj.player_first_name,
@@ -148,7 +148,7 @@ def dmstart():
     db.session.add(new_player)
     db.session.commit()
 
-    # save session information
+    # save session information to database
     player_session = PlayerSession(
         session_id=new_session_id,
         player_id=new_player.id

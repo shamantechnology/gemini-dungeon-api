@@ -15,5 +15,5 @@ Constraints:
 - Only reply in the following JSON format. Make sure it does not cause an error when converting from text to JSON via the JSON python library
 {{
     "content": "what you are saying to the player as the DM",
-    "view": "A detailed description of what the player is viewing."
+    "view": "A description of the spital via a prompt for a text-to-image model"
 }}

@@ -30,9 +30,9 @@ logging.basicConfig(format="[%(asctime)s] %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger("gdm_server")
 
 class GeminiDM:
-    def __init__(self):
+    def __init__(self, agent=False):
         self.dm_id = str(uuid.uuid4()).replace("-", "")
-        self.instruction_prompt_path = Path("prompts/dmstart.txt")
+        self.instruction_prompt_path = Path("prompts/dmstart.txt") if not agent else Path("prompts/dmagent.txt")
         self.story_path = Path("data/story.txt")
         self.player = None
         
@@ -50,10 +50,10 @@ class GeminiDM:
         llm_model = os.environ["LLM_MODEL"]
         llm_embedding_model = os.environ["LLM_EMBEDDING_MODEL"]
         if llm_provider == "google":
-            self.llm = ChatGoogleGenerativeAI(temperature=0, model=llm_model)
+            self.llm = ChatGoogleGenerativeAI(temperature=0.7, model=llm_model)
             self.embedding = VertexAIEmbeddings(model_name=llm_embedding_model)
         elif llm_provider == "openai":
-            self.llm = ChatOpenAI(temperature=0, model=llm_model)
+            self.llm = ChatOpenAI(temperature=0.7, model=llm_model)
             self.embedding = OpenAIEmbeddings(model=llm_embedding_model)
 
     def chat(self, user_msg: str, session_id: str = None, player: Player=None) -> str:
@@ -88,7 +88,11 @@ class GeminiDM:
             raise
 
         # setup memory
-        self.memory = ConversationSummaryBufferMemory(llm=self.llm, max_token_limit=10, chat_memory=self.history)
+        self.memory = ConversationSummaryBufferMemory(
+            llm=self.llm,
+            max_token_limit=10,
+            chat_memory=self.history
+        )
         
         # randomly pick campaign
         campaign_txt = ""
