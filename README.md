@@ -27,6 +27,17 @@ $ gcloud auth application-default login
 
 ### Running
 
+**Redis**
+
+Used via docker. Must be started before you can start the API
+
+```console
+$ docker pull redis/redis-stack
+$ docker run -d --name redis-stack -p 6379:6379 -p 8001:8001 -e REDIS_ARGS="--requirepass mypassword" redis/redis-stack:latest
+```
+
+**Gunicorn**
+
 To run the API, it is suggested to use something like uwsgi or gunicorn. We use [gunicorn](https://docs.gunicorn.org/en/stable/run.html).
 
 For example,

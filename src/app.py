@@ -165,7 +165,7 @@ def dmstart():
     
     log_info = {
         "from": f"dmstart",
-        "user": "Hello",
+        "user": "Hello, please introduce me to the campaign, current area, who you are and other information.",
         "ai": reply_dict["ai"],
         "vision": len(reply_dict["vision"]),
         "dm": gdm.dm_id,
