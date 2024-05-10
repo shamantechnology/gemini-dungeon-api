@@ -158,7 +158,11 @@ def dmstart():
     db.session.commit()
 
     # generate a player session id
-    reply_dict = generate_content(session_id=new_session_id, player=player_obj)
+    reply_dict = generate_content(
+        user_msg="Hello, please introduce me to the campaign, current area, who you are and other information.",
+        session_id=new_session_id,
+        player=player_obj
+    )
     
     # give initial player stats
     reply_dict["player_stats"] = player_obj.player_info()
