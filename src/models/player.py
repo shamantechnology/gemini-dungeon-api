@@ -23,6 +23,8 @@ class Player(db.Model):
     description = db.Column(db.Text, nullable=False)
     created_at = db.Column(
         db.DateTime(timezone=True), nullable=False, server_default=func.now())
+    updated_at = db.Column(
+        db.DateTime(timezone=True), nullable=False, onupdate=func.now())
 
     def __repr__(self) -> str:
         return f"<Player {self.first_name} {self.last_name} [lvl {self.level}]>"

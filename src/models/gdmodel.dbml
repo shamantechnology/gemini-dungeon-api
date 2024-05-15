@@ -1,8 +1,9 @@
 // Use DBML to define your database structure
 // Docs: https://dbml.dbdiagram.io/docs
 
-Table UserAccount {
-  id integer [primary key]
+Table player_account {
+  id integer [pk, increment]
+  player_id integer
   email varchar
   name varchar
   signon_method varchar
@@ -13,29 +14,42 @@ Table UserAccount {
   created_at timestamp
 }
 
-Table UserSessions {
-  id integer [primary key]
-  user_id integer
-  token text
-  from_ip varchar
-  valid bool
+Table player_sessions {
+  id integer [pk, increment]
+  player_id integer
+  session_id text
+  created_at timestamp
 }
 
-Table Player {
-  id integer [primary key]
-  user_id integer
-  name varchar
+Table player {
+  id integer [pk, increment]
+  stats_id integer
+  first_name varchar(512)
+  last_name varchar(512)
+  char_class varchar(100)
+  race varchar(40)
+  gender varchar(8) [default: 'Female']
+  alignment varchar(2)
+  level integer [default: 1]
+  hit_points integer [default: 5]
+  strength integer [default: 5]
+  dexterity integer [default: 5]
+  constitution integer [default: 5]
+  intelligence integer [default: 5]
+  wisdom integer [default: 5]
+  charisma integer [default: 5]
+  age integer [default: 18]
+  background text
+  description text
   created_at timestamp
   updated_at timestamp [default: `now()`]
 }
 
-Table PlayerStats {
-  id integer [primary key]
+Table player_stats {
+  id integer [pk, increment]
   player_id integer
   proficiency_mod integer [default: 2]
-  level integer [default: 0]
-  hp integer
-  exp intger [default: 0]
+  exp integer [default: 0]
   str_mod integer
   str_score integer
   dex_mod integer
@@ -54,10 +68,6 @@ Table PlayerStats {
   death_saves_failed integer [default: 0]
   hit_dice varchar
   speed varchar
-  class varchar
-  sex varchar
-  race varchar
-  alignment varchar
   personality_traits text
   ideals text
   bonds text
@@ -65,30 +75,30 @@ Table PlayerStats {
   languages text
 }
 
-Table PlayerFeaturesTraits {
-  id integer [primary key]
+Table player_features_traits {
+  id integer [pk, increment]
   player_id integer
   name varchar
   description text
 }
 
-Table PlayerItems {
-  id integer [primary key]
+Table player_items {
+  id integer [pk, increment]
   player_id integer
   item_id integer
   amount integer
 }
 
-Table PlayerWeapons {
-  id integer [primary key]
+Table player_weapons {
+  id integer [pk, increment]
   player_id integer
   item_id integer
   proficient bool [default: false]
   attack_bonus integer [default: 0]
 }
 
-Table PlayerBank {
-  id integer [primary key]
+Table player_bank {
+  id integer [pk, increment]
   player_id integer
   cp integer [default: 0]
   sp integer [default: 0]
@@ -97,21 +107,21 @@ Table PlayerBank {
   pp integer [default: 0]
 }
 
-Table NPC {
-  id integer [primary key]
+Table npc {
+  id integer [pk, increment]
   world_id integer
   name varchar
   location text
   created_at timestamp [default: `now()`]
 }
 
-Table NPCStats {
-  id integer [primary key]
+Table npc_stats {
+  id integer [pk, increment]
   npc_id integer
   proficiency_mod integer [default: 2]
   level integer [default: 0]
   hp integer
-  exp intger [default: 0]
+  exp integer [default: 0]
   str_mod integer
   str_score integer
   dex_mod integer
@@ -137,23 +147,23 @@ Table NPCStats {
   languages text
 }
 
-Table NPCFeaturesTraits {
-  id integer [primary key]
+Table npc_features_traits {
+  id integer [pk, increment]
   npc_id integer
   name varchar
   description text
 }
 
-Table NPCItems {
-  id integer [primary key]
+Table npc_items {
+  id integer [pk, increment]
   npc_id integer
   item_id integer
   proficient bool
   amount integer
 }
 
-Table NPCBank {
-  id integer [primary key]
+Table npc_bank {
+  id integer [pk, increment]
   npc_id integer
   cp integer [default: 0]
   sp integer [default: 0]
@@ -162,8 +172,8 @@ Table NPCBank {
   pp integer [default: 0]
 }
 
-Table NPCWeapons {
-  id integer [primary key]
+Table npc_weapons {
+  id integer [pk, increment]
   npc_id integer
   item_id integer
   proficient bool [default: false]
@@ -171,15 +181,16 @@ Table NPCWeapons {
 }
 
 
-Ref: Player.user_id > UserAccount.id
-Ref: PlayerFeaturesTraits.player_id - Player.id
-Ref: PlayerStats.player_id - Player.id
-Ref: PlayerItems.player_id - Player.id
-Ref: PlayerBank.player_id - Player.id
-Ref: PlayerWeapons.player_id - Player.id
+Ref: player.id - player_account.player_id
+Ref: player.id - player_sessions.player_id
+Ref: player.id - player_features_traits.player_id
+Ref: player.id - player_stats.player_id
+Ref: player.id - player_items.player_id
+Ref: player.id - player_bank.player_id
+Ref: player.id - player_weapons.player_id
 
-Ref: NPCFeaturesTraits.npc_id - NPC.id
-Ref: NPCStats.npc_id - NPC.id
-Ref: NPCItems.npc_id - NPC.id
-Ref: NPCBank.npc_id - NPC.id
-Ref: NPCWeapons.npc_id - NPC.id
+Ref: npc.id - npc_features_traits.npc_id
+Ref: npc.id - npc_stats.npc_id
+Ref: npc.id - npc_items.npc_id
+Ref: npc.id - npc_bank.npc_id
+Ref: npc.id - npc_weapons.npc_id

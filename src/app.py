@@ -20,7 +20,7 @@ from player import Player
 
 from models import db
 from models.player import Player as PlayerModel
-from models.player_session import PlayerSession
+from models.player_session import PlayerSessions
 
 logging.basicConfig(format="[%(asctime)s] %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger("gdm_server")
@@ -61,7 +61,14 @@ def generate_content(user_msg: str="Hello", session_id: str=None, player: Player
     """
     Generate AI text and image from user_msg, if any
     """
-    reply_dict = {"ai": "", "vision": "", "error": ""}
+    reply_dict = {
+        "role_name": "",
+        "ai": "", 
+        "vision": "", 
+        "error": "",
+        "player_stats": "",
+        "player_items": ""
+    }
     caught_exception = False
 
     try:
@@ -79,6 +86,9 @@ def generate_content(user_msg: str="Hello", session_id: str=None, player: Player
 
     if not caught_exception:
         try:
+            if "```json" in ai_resp:
+                logger.info("MARKDOWN detected in AI json reponse. Removing")
+                ai_resp = ai_resp.replace("```json", "").replace("```", "")
             ai_json = json.loads(ai_resp)
         except json.JSONDecodeError as err:
             logger.error(f"generate_content err 2: {err}")
@@ -99,6 +109,7 @@ def generate_content(user_msg: str="Hello", session_id: str=None, player: Player
             caught_exception = True
 
     if not caught_exception:
+        reply_dict["role_name"] = ai_json["role_name"]
         reply_dict["ai"] = ai_json["content"]
         reply_dict["session_id"] = gdm.session_id
 
@@ -107,6 +118,9 @@ def generate_content(user_msg: str="Hello", session_id: str=None, player: Player
         else:
             reply_dict["error"] = f"sapi artifact out of range: {sapi_reply}"
             logger.error(f"{reply_dict}")
+        
+        reply_dict["player_stats"] = ai_json["player_stats"]
+        reply_dict["player_items"] = ai_json["player_items"]
             
     return reply_dict
 
@@ -124,7 +138,7 @@ def dmstart():
     player_obj = Player()
 
     # save player information to database
-    print(f"\n---Saveing to player model: {str(player_obj)}\n")
+    print(f"\n---Saving player\n\n{str(player_obj)}\n")
     new_player = PlayerModel(
         first_name=player_obj.player_first_name,
         last_name=player_obj.player_last_name,
@@ -149,7 +163,7 @@ def dmstart():
     db.session.commit()
 
     # save session information to database
-    player_session = PlayerSession(
+    player_session = PlayerSessions(
         session_id=new_session_id,
         player_id=new_player.id
     )
@@ -157,23 +171,30 @@ def dmstart():
     db.session.add(player_session)
     db.session.commit()
 
-    # generate a player session id
-    reply_dict = generate_content(
-        user_msg="Hello, please introduce me to the campaign, current area, who you are and other information.",
-        session_id=new_session_id,
-        player=player_obj
-    )
-    
-    # give initial player stats
-    reply_dict["player_stats"] = player_obj.player_info()
+    try:
+        # generate a player session id
+        reply_dict = generate_content(
+            user_msg="Hello, please introduce me to the campaign, current area, who you are and other information.",
+            session_id=new_session_id,
+            player=player_obj
+        )
+    except Exception as err:
+        logger.error(f"reply_dict generation failed: {err}")
+        return make_response(
+            jsonify({"error": "content generation failed", "type": 0}),
+            400
+        )
     
     log_info = {
         "from": f"dmstart",
         "user": "Hello, please introduce me to the campaign, current area, who you are and other information.",
+        "role_name": reply_dict["role_name"],
         "ai": reply_dict["ai"],
         "vision": len(reply_dict["vision"]),
         "dm": gdm.dm_id,
-        "session": reply_dict["session_id"]
+        "session": reply_dict["session_id"],
+        "player_stats": reply_dict["player_stats"],
+        "player_items": reply_dict["player_items"]
     }
 
     for i, v in log_info.items():
@@ -195,7 +216,7 @@ def run():
         )
     
     # check if valid session_id
-    session_query = PlayerSession.query.filter_by(session_id=session_id).first()
+    session_query = PlayerSessions.query.filter_by(session_id=session_id).first()
     if not session_query:
         return make_response(
             jsonify({"error": "no session id found", "type": 0}),

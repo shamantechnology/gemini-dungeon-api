@@ -1,7 +1,7 @@
 from . import db
 from sqlalchemy.sql import func
 
-class PlayerSession(db.Model):
+class PlayerSessions(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     session_id = db.Column(db.Text, nullable=False)
     player_id = db.Column(db.Integer, db.ForeignKey("player.id"), nullable=False)

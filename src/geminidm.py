@@ -53,7 +53,7 @@ class GeminiDM:
             self.llm = ChatGoogleGenerativeAI(temperature=0.7, model=llm_model)
             self.embedding = VertexAIEmbeddings(model_name=llm_embedding_model)
         elif llm_provider == "openai":
-            self.llm = ChatOpenAI(temperature=0.7, model=llm_model)
+            self.llm = ChatOpenAI(temperature=0.3, model=llm_model)
             self.embedding = OpenAIEmbeddings(model=llm_embedding_model)
 
     def chat(self, user_msg: str, session_id: str = None, player: Player=None) -> str:
@@ -73,6 +73,7 @@ class GeminiDM:
             self.player = player
 
         # setup redis chat history
+        logger.info(f"Loading redis history @ main_{self.session_id}")
         self.hkey_prefix = f"main_{self.session_id}"
         self.history = RedisChatMessageHistory(
             url=os.environ["REDIS_URL"], 
@@ -88,6 +89,7 @@ class GeminiDM:
             raise
 
         # setup memory
+        logger.info(f"Loading conversation history")
         self.memory = ConversationSummaryBufferMemory(
             llm=self.llm,
             max_token_limit=10,
@@ -131,15 +133,20 @@ class GeminiDM:
             input_variables=["history", "input"], template=prompt_txt
         )
 
-        # creating llm chain
-        self.conversation = ConversationChain(
-            llm=self.llm,
-            prompt=self.instruction_prompt_template,
-            memory=self.memory,
-            verbose=True,
-        )
+        try:
+            logger.info("Creating conversation chain and invoking")
+            # creating llm chain
+            self.conversation = ConversationChain(
+                llm=self.llm,
+                prompt=self.instruction_prompt_template,
+                memory=self.memory,
+                verbose=True,
+            )
 
-        resp = self.conversation.invoke(user_msg)
-        logger.info(f"ai raw response: {resp['response']}")
-        
+            resp = self.conversation.invoke(user_msg)
+            logger.info(f"ai raw response: {resp['response']}")
+        except Exception as err:
+            logger.error(f"chaining and invoking failed: {err}")
+            raise
+            
         return resp["response"]
