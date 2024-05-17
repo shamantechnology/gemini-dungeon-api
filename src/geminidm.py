@@ -117,8 +117,12 @@ class GeminiDM:
         # have to reformat dict as conversationchain will mistake
         # it as a template variable
         prompt_txt += f"""
-        Player Info:
-        {{{self.player.player_info()}}}\n"""
+        Player Stats:
+        {{{self.player.player_info()}}}
+        Player Items:
+        {", ".join(self.player.inventory)}"""
+
+        logger.info(prompt_txt)
 
         prompt_txt += """
         Current Conversation:

@@ -210,6 +210,7 @@ def run():
     session_id = request.json["session_id"]
 
     if session_id == "" or session_id is None:
+        logger.error("no session id found")
         return make_response(
             jsonify({"error": "no session id found", "type": 0}),
             400
@@ -218,6 +219,7 @@ def run():
     # check if valid session_id
     session_query = PlayerSessions.query.filter_by(session_id=session_id).first()
     if not session_query:
+        logger.error("no session id found")
         return make_response(
             jsonify({"error": "no session id found", "type": 0}),
             400
@@ -246,13 +248,28 @@ def run():
     )
 
     reply_dict = generate_content(user_msg, session_id, player)
-    reply_dict["player_stats"] = player.player_info()
-    
     json_reply = jsonify(reply_dict)
+
+    # check if player needs to be updated
+    update_player = False
 
     if "action" in reply_dict:
         logger.info(f"Action called: {reply_dict['action']}")
 
+    if "player_stats" in reply_dict:
+        player.update_player(reply_dict["player_stats"])
+        update_player = True
+
+    if "player_items" in reply_dict:
+        player.update_items(reply_dict["player_items"])
+        update_player = True
+
+    if update_player:
+        try:
+            db.session.commit()
+        except Exception as err:
+            logger.error(f"updating play db info error: {err}")
+        
     logger.info({
         "from": f"run",
         "user": user_msg,
