@@ -257,12 +257,18 @@ def run():
         logger.info(f"Action called: {reply_dict['action']}")
 
     if "player_stats" in reply_dict:
-        player.update_player(reply_dict["player_stats"])
-        update_player = True
+        try:
+            player.update_player(reply_dict["player_stats"])
+            update_player = True
+        except:
+            logging.error(f"Update player failed. Skipping...")
 
     if "player_items" in reply_dict:
-        player.update_items(reply_dict["player_items"])
-        update_player = True
+        try:
+            player.update_items(reply_dict["player_items"])
+            update_player = True
+        except:
+            logging.error(f"Update items failed. Skipping...")
 
     if update_player:
         try:

@@ -231,49 +231,57 @@ class Player:
     def update_player(self, ai_player_stats: dict):
         pstats = self.player_info()
 
-        updates_needed = []
-        for k,v in pstats.items():
-            if ai_player_stats[k] != v:
-                updates_needed.append(k)
+        try:
+            updates_needed = []
+            for k,v in pstats.items():
+                if ai_player_stats[k] != v:
+                    updates_needed.append(k)
 
-        for v in updates_needed:
-            if v == "name":
-                self.dndc.name = ai_player_stats[v]
-            if v == "age":
-                self.dndc.age = ai_player_stats[v]
-            if v == "class":
-                self.dndc.class_name = ai_player_stats[v]
-            if v == "level":
-                self.dndc.level = ai_player_stats[v]
-            if v == "hit_points":
-                self.dndc.hit_points = ai_player_stats[v]
-            if v == "race":
-                self.dndc.race = ai_player_stats[v]
-            if v == "gender":
-                self.dndc.gender = ai_player_stats[v]
-            if v == "alignment":
-                self.dndc.alignment = ai_player_stats[v]
-            if v == "description":
-                self.dndc.description = ai_player_stats[v]
-            if v == "background":
-                self.dndc.background = ai_player_stats[v]
-            if v == "strength":
-                self.dndc.strength = ai_player_stats[v]
-            if v == "dexterity":
-                self.dndc.dexterity = ai_player_stats[v]
-            if v == "constitution":
-                self.dndc.constitution = ai_player_stats[v]
-            if v == "intelligence":
-                self.dndc.intelligence = ai_player_stats[v]
-            if v == "wisdom":
-                self.dndc.wisdom = ai_player_stats[v]
-            if v == "charisma":
-                self.dndc.charisma = ai_player_stats[v]
+            for v in updates_needed:
+                if v == "name":
+                    self.dndc.name = ai_player_stats[v]
+                if v == "age":
+                    self.dndc.age = ai_player_stats[v]
+                if v == "class":
+                    self.dndc.class_name = ai_player_stats[v]
+                if v == "level":
+                    self.dndc.level = ai_player_stats[v]
+                if v == "hit_points":
+                    self.dndc.hit_points = ai_player_stats[v]
+                if v == "race":
+                    self.dndc.race = ai_player_stats[v]
+                if v == "gender":
+                    self.dndc.gender = ai_player_stats[v]
+                if v == "alignment":
+                    self.dndc.alignment = ai_player_stats[v]
+                if v == "description":
+                    self.dndc.description = ai_player_stats[v]
+                if v == "background":
+                    self.dndc.background = ai_player_stats[v]
+                if v == "strength":
+                    self.dndc.strength = ai_player_stats[v]
+                if v == "dexterity":
+                    self.dndc.dexterity = ai_player_stats[v]
+                if v == "constitution":
+                    self.dndc.constitution = ai_player_stats[v]
+                if v == "intelligence":
+                    self.dndc.intelligence = ai_player_stats[v]
+                if v == "wisdom":
+                    self.dndc.wisdom = ai_player_stats[v]
+                if v == "charisma":
+                    self.dndc.charisma = ai_player_stats[v]
+        except Exception as err:
+            self.class_logger.error(f"update_player failed: {err}")
+            raise
 
     def update_items(self, item_list: list):
-        for item in item_list:
-            if item not in self.inventory:
-                self.inventory.append(item)
+        try:
+            for item in item_list:
+                if item not in self.inventory:
+                    self.inventory.append(item)
+        except Exception as err:
+            self.class_logger.error(f"update_items failed: {err}")
+            raise
 
     def __str__(self):
         pinfo = ""
