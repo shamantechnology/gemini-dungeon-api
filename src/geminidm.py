@@ -46,15 +46,26 @@ class GeminiDM:
         self.campaign_file = Path(f"data/campaign{random.randint(1,8)}.txt")
 
         # setup llm
-        llm_provider = os.environ["LLM_PROVIDER"]
-        llm_model = os.environ["LLM_MODEL"]
-        llm_embedding_model = os.environ["LLM_EMBEDDING_MODEL"]
-        if llm_provider == "google":
-            self.llm = ChatGoogleGenerativeAI(temperature=0.7, model=llm_model)
-            self.embedding = VertexAIEmbeddings(model_name=llm_embedding_model)
-        elif llm_provider == "openai":
-            self.llm = ChatOpenAI(temperature=0.3, model=llm_model)
-            self.embedding = OpenAIEmbeddings(model=llm_embedding_model)
+        self.llm_provider = os.environ["LLM_PROVIDER"]
+        self.llm_model = os.environ["LLM_MODEL"]
+        self.llm_embedding_model = os.environ["LLM_EMBEDDING_MODEL"]
+        
+        try:
+            self.llm_temperature = float(os.environ["LLM_TEMPERATURE"])
+        except Exception as err:
+            logger.error(f"llm_tempature not a float, setting to 0.7: {err}")
+            self.llm_temperature = 0.7
+
+        self.setup_llm()
+        
+
+    def setup_llm(self):
+        if self.llm_provider == "google":
+            self.llm = ChatGoogleGenerativeAI(temperature=self.llm_temperature, model=self.llm_model)
+            self.embedding = VertexAIEmbeddings(model_name=self.llm_embedding_model)
+        elif self.llm_provider == "openai":
+            self.llm = ChatOpenAI(temperature=self.llm_temperature, model=self.llm_model)
+            self.embedding = OpenAIEmbeddings(model=self.llm_embedding_model)
 
     def chat(self, user_msg: str, session_id: str = None, player: Player=None) -> str:
         """
