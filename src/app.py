@@ -57,7 +57,7 @@ with app.app_context():
     dt_run = datetime.now().strftime("%m%d%Y %H:%M:%s")
     logger.info(f"------ Starting Gemini Dungeon API @ {dt_run} ---------")
 
-def generate_content(user_msg: str="Hello", session_id: str=None, player: Player=None) -> str:
+def generate_content(user_msg: str="Hello", session_id: str=None, player: Player=None, use_llm: str=os.environ["LLM_MODEL"]) -> str:
     """
     Generate AI text and image from user_msg, if any
     """
@@ -193,12 +193,15 @@ def dmstart():
         "vision": len(reply_dict["vision"]),
         "dm": gdm.dm_id,
         "session": reply_dict["session_id"],
+        "use_llm": player_session.use_llm,
         "player_stats": reply_dict["player_stats"],
         "player_items": reply_dict["player_items"]
     }
 
     for i, v in log_info.items():
         logger.info(f"- {i}: {v}")
+
+    json_reply["use_llm"] = player_session.use_llm
 
     json_reply = jsonify(reply_dict)
     return make_response(json_reply, 200)
@@ -208,6 +211,7 @@ def dmstart():
 def run():
     user_msg = request.json["usermsg"]
     session_id = request.json["session_id"]
+    use_llm = request.json["use_llm"]
 
     if session_id == "" or session_id is None:
         logger.error("no session id found")
@@ -224,6 +228,7 @@ def run():
             jsonify({"error": "no session id found", "type": 0}),
             400
         )
+    session_query.use_llm = use_llm
 
     # get player information from session id
     player_query = PlayerModel.query.filter_by(id=session_query.player_id).first()
@@ -248,6 +253,7 @@ def run():
     )
 
     reply_dict = generate_content(user_msg, session_id, player)
+    reply_dict["use_llm"] = session_query.use_llm
     json_reply = jsonify(reply_dict)
 
     # check if player needs to be updated
@@ -276,7 +282,8 @@ def run():
         "ai": reply_dict["ai"],
         "vision": len(reply_dict["vision"]),
         "dm": gdm.dm_id,
-        "session": reply_dict["session_id"]
+        "session": reply_dict["session_id"],
+        "use_llm": session_query.use_llm
     })
 
     return make_response(json_reply, 200)

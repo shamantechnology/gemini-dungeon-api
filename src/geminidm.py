@@ -46,6 +46,7 @@ class GeminiDM:
         self.campaign_file = Path(f"data/campaign{random.randint(1,8)}.txt")
 
         # setup llm
+        self.use_llm = os.environ["LLM_MODEL"]
         llm_provider = os.environ["LLM_PROVIDER"]
         llm_model = os.environ["LLM_MODEL"]
         llm_embedding_model = os.environ["LLM_EMBEDDING_MODEL"]
@@ -56,7 +57,7 @@ class GeminiDM:
             self.llm = ChatOpenAI(temperature=0.3, model=llm_model)
             self.embedding = OpenAIEmbeddings(model=llm_embedding_model)
 
-    def chat(self, user_msg: str, session_id: str = None, player: Player=None) -> str:
+    def chat(self, user_msg: str, session_id: str = None, player: Player=None, use_llm: str=os.environ["LLM_MODEL"]) -> str:
         """
         Initialize conversation and memory per session
         Initialize player information, if needed
